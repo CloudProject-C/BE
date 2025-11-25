@@ -16,6 +16,18 @@ import java.util.List;
 public class PlaceRepository {
     private final JdbcTemplate jdbcTemplate;
 
+    private final PlaceJpaRepository jpaRepository;
+
+    public List<Place> findAll() {
+        return jpaRepository.findAll();
+    }
+
+    public Place findByIdWithJpa(Long id) {
+        return jpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Place not found"));
+    }
+
+
     public void saveAll(List<Place> places) {
         String sql = "INSERT INTO place (" +
                 "id, place_name, category_group_code, category_group_name, category_name, " +
