@@ -1,7 +1,8 @@
-package com.cloudproject.TeamC.CampEat.infrastructure;
+package com.cloudproject.TeamC.CampEat.infrastructure.persistence;
 
 
 import com.cloudproject.TeamC.CampEat.domain.Place;
+import com.cloudproject.TeamC.CampEat.infrastructure.persistence.PlaceJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
