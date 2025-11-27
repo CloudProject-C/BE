@@ -2,11 +2,16 @@ package com.cloudproject.TeamC.CampEat.application;
 
 import com.cloudproject.TeamC.CampEat.domain.*;
 import com.cloudproject.TeamC.CampEat.dto.request.ReviewCreateRequest;
+import com.cloudproject.TeamC.CampEat.dto.response.ReviewResponse;
 import com.cloudproject.TeamC.CampEat.exception.code.CampEatErrorCode;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.*;
 import com.cloudproject.TeamC.CampEat.exception.CampEatException;
 import com.cloudproject.TeamC.global.util.LocationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +25,7 @@ import java.util.List;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     private final UserRepository userRepository;
     private final PlaceRepository placeRepository;
     private final S3Service s3Service;
@@ -74,6 +80,39 @@ public class ReviewService {
         reviewRepository.save(review);
 
         return uploadedImageUrls;
+    }
+
+    public Page<ReviewResponse> getReviews(Long placeId, String sortType, int page, int size, Long currentUserId) {
+        Pageable pageable = createPageable(sortType, page, size);
+        Page<Review> reviewPage;
+
+        if ("LIKES".equalsIgnoreCase(sortType)) {
+            reviewPage = reviewRepository.findAllByPlaceIdOrderByLikesDesc(placeId, PageRequest.of(page, size));
+        } else {
+            reviewPage = reviewRepository.findAllByPlaceIdAndIsHiddenFalse(placeId, pageable);
+        }
+
+        // currentUserId를 DTO 생성 메서드에 전달
+        return reviewPage.map(review -> {
+            long likeCount = reviewRepository.countLikesByReviewId(review.getId());
+            return ReviewResponse.from(review, likeCount, currentUserId);
+        });
+    }
+
+    private Pageable createPageable(String sortType, int page, int size) {
+        Sort sort = switch (sortType.toUpperCase()) {
+            case "LATEST" -> Sort.by(Sort.Direction.DESC, "createdAt");
+            case "OLDEST" -> Sort.by(Sort.Direction.ASC, "createdAt");
+            case "RATING_HIGH" -> Sort.by(Sort.Direction.DESC, "rating");
+            case "RATING_LOW" -> Sort.by(Sort.Direction.ASC, "rating");
+            default -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
+
+        if ("LIKES".equalsIgnoreCase(sortType)) {
+            return PageRequest.of(page, size);
+        }
+
+        return PageRequest.of(page, size, sort);
     }
 
     private void validateSchoolProximity(School school, Place place) {
