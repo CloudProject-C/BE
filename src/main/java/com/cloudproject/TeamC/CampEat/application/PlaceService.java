@@ -2,6 +2,8 @@ package com.cloudproject.TeamC.CampEat.application;
 
 import com.cloudproject.TeamC.CampEat.domain.FoodCategory;
 import com.cloudproject.TeamC.CampEat.domain.Place;
+import com.cloudproject.TeamC.CampEat.domain.PlaceLike;
+import com.cloudproject.TeamC.CampEat.domain.User;
 import com.cloudproject.TeamC.CampEat.dto.response.PlaceDetailResponse;
 import com.cloudproject.TeamC.CampEat.dto.response.PlaceMapResponse;
 import com.cloudproject.TeamC.CampEat.exception.CampEatException;
@@ -9,6 +11,7 @@ import com.cloudproject.TeamC.CampEat.exception.code.CampEatErrorCode;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.PlaceLikeRepository;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.PlaceRepository;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.ReviewRepository;
+import com.cloudproject.TeamC.CampEat.infrastructure.repository.UserRepository;
 import com.cloudproject.TeamC.global.util.LocationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,7 @@ public class PlaceService {
     private final PlaceRepository placeRepository;
     private final ReviewRepository reviewRepository;
     private final PlaceLikeRepository placeLikeRepository;
+    private final UserRepository userRepository;
 
     private static final int WGS84_SRID = 4326;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
@@ -112,6 +116,25 @@ public class PlaceService {
         // TODO: AI 추천순은 추후 구현
 
         return responses;
+    }
+
+    @Transactional
+    public void togglePlaceLike(Long placeId, Long userId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new CampEatException(CampEatErrorCode.PLACE_NOT_FOUND));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CampEatException(CampEatErrorCode.USER_NOT_FOUND));
+
+        // 있으면 삭제(취소), 없으면 저장(찜)
+        placeLikeRepository.findByPlaceAndUser(place, user)
+                .ifPresentOrElse(
+                        placeLikeRepository::delete,
+                        () -> placeLikeRepository.save(PlaceLike.builder()
+                                .place(place)
+                                .user(user)
+                                .build())
+                );
     }
 
     private String mapCategoryToKeyword(FoodCategory category) {

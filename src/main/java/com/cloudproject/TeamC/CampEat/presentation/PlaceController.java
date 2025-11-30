@@ -43,4 +43,15 @@ public class PlaceController implements PlaceSwagger {
         List<PlaceMapResponse> response = placeService.getPlacesNearby(latitude, longitude, radius, sort, category);
         return CommonResponse.success(FETCH_NEARBY_PLACES_SUCCESS, response);
     }
+
+    @Override
+    @PostMapping("/{placeId}/like")
+    public CommonResponse<Void> togglePlaceLike(
+            @PathVariable Long placeId,
+            @RequestParam Long userId
+    ) {
+        // TODO: 로그인 생기면 userId 다시
+        placeService.togglePlaceLike(placeId, userId);
+        return CommonResponse.success(PLACE_LIKE_TOGGLE_SUCCESS);
+    }
 }

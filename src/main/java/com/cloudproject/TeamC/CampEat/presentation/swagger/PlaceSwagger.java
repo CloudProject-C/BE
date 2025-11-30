@@ -53,4 +53,13 @@ public interface PlaceSwagger {
             @Parameter(description = "카테고리 필터 (KOREAN, WESTERN 등)", required = false)
             @RequestParam(required = false) FoodCategory category
     );
+
+    @Operation(summary = "음식점 찜하기 (토글)", description = "음식점을 찜하거나 취소합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공")
+    })
+    CommonResponse<Void> togglePlaceLike(
+            @Parameter(description = "장소 ID", example = "1") @PathVariable Long placeId,
+            @Parameter(description = "유저 ID") @RequestParam Long userId
+    );
 }
