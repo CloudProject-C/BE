@@ -50,12 +50,12 @@ public class UserService {
 
     // 2. 내가 작성한 리뷰 목록 조회
     public Page<MyReviewResponse> getMyReviews(Long userId, String sortType, int page, int size) {
-        Pageable pageable = createReviewPageable(sortType, page, size);
         Page<Object[]> reviewPage;
 
         if ("LIKES".equalsIgnoreCase(sortType)) {
             reviewPage = reviewRepository.findReviewsByUserIdWithLikeCountOrderByLikesDesc(userId, PageRequest.of(page, size));
         } else {
+            Pageable pageable = createReviewPageable(sortType, page, size);
             reviewPage = reviewRepository.findReviewsByUserIdWithLikeCount(userId, pageable);
         }
 
@@ -115,10 +115,6 @@ public class UserService {
             case "RATING_LOW" -> Sort.by(Sort.Direction.ASC, "rating");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
-
-        if ("LIKES".equalsIgnoreCase(sortType)) {
-            return PageRequest.of(page, size);
-        }
 
         return PageRequest.of(page, size, sort);
     }
