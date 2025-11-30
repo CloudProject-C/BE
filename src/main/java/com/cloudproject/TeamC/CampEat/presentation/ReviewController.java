@@ -48,7 +48,7 @@ public class ReviewController implements ReviewSwagger {
             @RequestParam String sort,
             @RequestParam int page,
             @RequestParam int size,
-            @RequestParam Long userId
+            @RequestParam(required = false) Long userId
     ) {
         // TODO: 로그인 생기면 추가 구현
         // userId가 null이면 비로그인 상태로 간주 (isMyReview = false)
@@ -60,11 +60,11 @@ public class ReviewController implements ReviewSwagger {
     @Override
     @PostMapping("/{reviewId}/like")
     public CommonResponse<Void> toggleReviewLike(
-            @PathVariable Long reviewId,
-            @RequestParam Long userId
+            @PathVariable Long reviewId
     ) {
+        Long mockUserId = 1L;
         // TODO: 로그인 생기면 userId 다시
-        reviewService.toggleReviewLike(reviewId, userId);
+        reviewService.toggleReviewLike(reviewId, mockUserId);
         return CommonResponse.success(REVIEW_LIKE_TOGGLE_SUCCESS);
     }
 }
