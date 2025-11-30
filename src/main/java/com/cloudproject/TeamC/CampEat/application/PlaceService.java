@@ -35,7 +35,6 @@ public class PlaceService {
                 sb.append(line);
             }
 
-            // 최상위는 배열: [ { "places": [ ... ] } ]
             JSONArray root = new JSONArray(sb.toString());
 
             for (int i = 0; i < root.length(); i++) {
@@ -75,55 +74,6 @@ public class PlaceService {
     }
 
 
-//    public List<Place> parsePlacesFromJsonFile(String filePath) {
-//        List<Place> result = new ArrayList<>();
-//
-//        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-//            StringBuilder sb = new StringBuilder();
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                sb.append(line);
-//            }
-//
-//            // 최상위는 배열: [ { "places": [ ... ] } ]
-//            JSONArray root = new JSONArray(sb.toString());
-//
-//            for (int i = 0; i < root.length(); i++) {
-//                JSONObject obj = root.getJSONObject(i);
-//                JSONArray places = obj.getJSONArray("places");
-//
-//                for (int j = 0; j < places.length(); j++) {
-//                    JSONObject p = places.getJSONObject(j);
-//                    Place place = new Place();
-//
-//                    place.setId(Long.parseLong(p.getString("id")));
-//                    place.setPlaceName(p.optString("place_name", null));
-//                    place.setCategoryGroupCode(p.optString("category_group_code", null));
-//                    place.setCategoryGroupName(p.optString("category_group_name", null));
-//                    place.setCategoryName(p.optString("category_name", null));
-//                    place.setPhone(p.optString("phone", null));
-//                    place.setAddressName(p.optString("address_name", null));
-//                    place.setRoadAddressName(p.optString("road_address_name", null));
-//                    place.setX(p.optDouble("x"));
-//                    place.setY(p.optDouble("y"));
-//
-//                    // distance는 문자열이므로 int로 변환 (없으면 0)
-//                    String distanceStr = p.optString("distance", "0");
-//                    place.setDistance(distanceStr.isEmpty() ? 0 : Integer.parseInt(distanceStr));
-//
-//                    place.setPlaceUrl(p.optString("place_url", null));
-//
-//                    result.add(place);
-//                }
-//            }
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("places JSON 파싱 실패", e);
-//        }
-//
-//        return result;
-//    }
-
     public void importPlacesFromJson(String filePath) {
         List<Place> places = parsePlacesFromJsonFile(filePath);
         placeRepository.saveAll(places);
@@ -141,9 +91,23 @@ public class PlaceService {
 
         String keywords = geminiApiService.getKeywordsFromGemini(prompt);
         float[] embedding = geminiApiService.getEmbeddingFromGemini(keywords);
-        qdrantService.createCollectionIfNotExists(768);
+
+        log.info("embedding length={}", embedding.length);
+        qdrantService.createCollectionIfNotExists("restaurants",3072);
         qdrantService.saveEmbeddingToQdrant(place.getId(), embedding, keywords);
     }
 
+    @Transactional
+    public void processAllPlaces() {
+        List<Place> places = placeRepository.findAll();
+
+        for (Place place : places) {
+            // placeId 기준으로 기존 로직 재사용
+            processPlace(place.getId());
+        }
+    }
 
 }
+
+
+

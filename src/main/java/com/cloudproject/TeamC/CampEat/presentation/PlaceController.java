@@ -24,4 +24,11 @@ public class PlaceController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/embed-all")
+    public ResponseEntity<Void> embedAll() {
+        placeService.processAllPlaces();
+        return ResponseEntity.ok().build();
+    }
+
+
 }
