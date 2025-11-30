@@ -57,4 +57,24 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                     "WHERE t.rn = 1",
             nativeQuery = true)
     List<Object[]> findLatestReviewImagesByPlaceIds(@Param("placeIds") List<Long> placeIds);
+
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.user.school.id = :schoolId")
+    Long countBySchoolId(@Param("schoolId") Long schoolId);
+
+    Long countByUserId(Long userId);
+
+    // 내 리뷰 + 좋아요 수 조회 (일반 정렬용)
+    @Query("SELECT r, COUNT(rl) FROM Review r " +
+            "LEFT JOIN ReviewLike rl ON rl.review = r " +
+            "WHERE r.user.id = :userId AND r.isHidden = false " +
+            "GROUP BY r")
+    Page<Object[]> findReviewsByUserIdWithLikeCount(@Param("userId") Long userId, Pageable pageable);
+
+    // 내 리뷰 + 좋아요 수 조회 (좋아요 순 정렬용)
+    @Query("SELECT r, COUNT(rl) FROM Review r " +
+            "LEFT JOIN ReviewLike rl ON rl.review = r " +
+            "WHERE r.user.id = :userId AND r.isHidden = false " +
+            "GROUP BY r " +
+            "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
+    Page<Object[]> findReviewsByUserIdWithLikeCountOrderByLikesDesc(@Param("userId") Long userId, Pageable pageable);
 }

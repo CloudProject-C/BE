@@ -17,4 +17,6 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
             @Param("radius") Double radius,
             @Param("categoryKeyword") String categoryKeyword
     );
+
+    Long countBySchoolId(Long schoolId);
 }

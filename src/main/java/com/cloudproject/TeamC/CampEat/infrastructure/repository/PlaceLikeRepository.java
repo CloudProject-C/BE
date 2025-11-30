@@ -3,6 +3,9 @@ package com.cloudproject.TeamC.CampEat.infrastructure.repository;
 import com.cloudproject.TeamC.CampEat.domain.Place;
 import com.cloudproject.TeamC.CampEat.domain.PlaceLike;
 import com.cloudproject.TeamC.CampEat.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,8 +21,6 @@ public interface PlaceLikeRepository extends JpaRepository<PlaceLike, Long> {
 
     long countByPlace(Place place);
 
-    boolean existsByPlaceAndUser(Place place, User user);
-
     // [신규] 배치: 좋아요 개수 (placeId별 그룹핑)
     @Query("SELECT pl.place.id, COUNT(pl) " +
             "FROM PlaceLike pl " +
@@ -32,4 +33,9 @@ public interface PlaceLikeRepository extends JpaRepository<PlaceLike, Long> {
             "FROM PlaceLike pl " +
             "WHERE pl.user.id = :userId AND pl.place.id IN :placeIds")
     List<Long> findLikedPlaceIds(@Param("userId") Long userId, @Param("placeIds") List<Long> placeIds);
+
+    Long countByUserId(Long userId);
+
+    @EntityGraph(attributePaths = {"place"})
+    Page<PlaceLike> findByUserId(Long userId, Pageable pageable);
 }
