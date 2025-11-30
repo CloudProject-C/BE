@@ -53,7 +53,7 @@ public interface ReviewSwagger {
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
     CommonResponse<Page<ReviewResponse>> getReviews(
-            @Parameter(description = "장소 ID", example = "1")
+            @Parameter(description = "장소 ID", example = "7724465")
             @PathVariable Long placeId,
 
             @Parameter(description = "정렬 순서 (LATEST, OLDEST, RATING_HIGH, RATING_LOW, LIKES)", example = "LATEST")
@@ -65,7 +65,14 @@ public interface ReviewSwagger {
             @Parameter(description = "페이지 크기", example = "10")
             @RequestParam(defaultValue = "10") int size,
 
-            @Parameter(description = "현재 로그인한 사용자 ID (비로그인 시 생략 가능)")
+            @Parameter(description = "유저 ID")
             @RequestParam(required = false) Long userId
     );
+
+    @Operation(summary = "리뷰 좋아요 (토글)", description = "리뷰에 좋아요를 누르거나 취소합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공")
+    })
+    CommonResponse<Void> toggleReviewLike(
+            @Parameter(description = "리뷰 ID", example = "10") @PathVariable Long reviewId);
 }

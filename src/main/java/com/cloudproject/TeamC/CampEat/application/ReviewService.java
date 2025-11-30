@@ -17,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -93,12 +95,42 @@ public class ReviewService {
             reviewPage = reviewRepository.findReviewsWithLikeCount(placeId, pageable);
         }
 
+        Set<Long> likedReviewIds = new HashSet<>();
+        if (currentUserId != null && !reviewPage.isEmpty()) {
+            List<Long> reviewIds = reviewPage.getContent().stream()
+                    .map(obj -> ((Review) obj[0]).getId())
+                    .toList();
+            likedReviewIds.addAll(reviewLikeRepository.findLikedReviewIds(currentUserId, reviewIds));
+        }
+
         // currentUserId를 DTO 생성 메서드에 전달
         return reviewPage.map(result -> {
             Review review = (Review) result[0];
             Long likeCount = (Long) result[1];
-            return ReviewResponse.from(review, likeCount, currentUserId);
+
+            boolean isLiked = likedReviewIds.contains(review.getId());
+
+            return ReviewResponse.from(review, likeCount, currentUserId, isLiked);
         });
+    }
+
+    @Transactional
+    public void toggleReviewLike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CampEatException(CampEatErrorCode.REVIEW_NOT_FOUND));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CampEatException(CampEatErrorCode.USER_NOT_FOUND));
+
+        // 있으면 삭제(취소), 없으면 저장(좋아요)
+        reviewLikeRepository.findByReviewAndUser(review, user)
+                .ifPresentOrElse(
+                        reviewLikeRepository::delete,
+                        () -> reviewLikeRepository.save(ReviewLike.builder()
+                                .review(review)
+                                .user(user)
+                                .build())
+                );
     }
 
     private Pageable createPageable(String sortType, int page, int size) {

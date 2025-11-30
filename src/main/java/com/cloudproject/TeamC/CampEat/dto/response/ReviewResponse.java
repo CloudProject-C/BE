@@ -34,9 +34,12 @@ public record ReviewResponse(
         long likeCount,
 
         @Schema(description = "본인이 작성한 리뷰인지 여부", example = "true")
-        boolean isMyReview
+        boolean isMyReview,
+
+        @Schema(description = "내가 좋아요 누른 여부", example = "true")
+        boolean isLiked
 ) {
-    public static ReviewResponse from(Review review, long likeCount, Long currentUserId) {
+    public static ReviewResponse from(Review review, long likeCount, Long currentUserId,  boolean isLiked) {
         return ReviewResponse.builder()
                 .reviewId(review.getId())
                 .nickname(review.getUser().getNickname())
@@ -48,6 +51,7 @@ public record ReviewResponse(
                 .imageUrls(review.getImages().stream()
                         .map(ReviewImage::getImageUrl)
                         .collect(Collectors.toList()))
+                .isLiked(isLiked)
                 .build();
     }
 }
