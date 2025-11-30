@@ -17,4 +17,7 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
             @Param("radius") Double radius,
             @Param("categoryKeyword") String categoryKeyword
     );
+
+    @Query(value = "SELECT COUNT(*) FROM place p WHERE ST_Distance_Sphere(p.location, :schoolLocation) <= :radius", nativeQuery = true)
+    Long countPlacesNearSchool(@Param("schoolLocation") Point schoolLocation, @Param("radius") double radius);
 }
