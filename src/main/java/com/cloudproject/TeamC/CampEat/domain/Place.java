@@ -17,6 +17,10 @@ public class Place extends BaseEntity {
     @Column(name = "id")
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "school_id", nullable = false)
+    private School school;
+
     @Column(name = "place_name", length = 255)
     private String placeName;
 
@@ -54,6 +58,7 @@ public class Place extends BaseEntity {
     @Builder
     private Place(
             Long id,
+            School school,
             String placeName,
             String categoryGroupCode,
             String categoryGroupName,
@@ -66,6 +71,7 @@ public class Place extends BaseEntity {
             String placeUrl
     ) {
         this.id = id;
+        this.school = school;
         this.placeName = placeName;
         this.categoryGroupCode = categoryGroupCode;
         this.categoryGroupName = categoryGroupName;
