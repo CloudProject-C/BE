@@ -101,6 +101,25 @@ public class ReviewService {
         });
     }
 
+    @Transactional
+    public void toggleReviewLike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CampEatException(CampEatErrorCode.REVIEW_NOT_FOUND));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CampEatException(CampEatErrorCode.USER_NOT_FOUND));
+
+        // 있으면 삭제(취소), 없으면 저장(좋아요)
+        reviewLikeRepository.findByReviewAndUser(review, user)
+                .ifPresentOrElse(
+                        reviewLikeRepository::delete,
+                        () -> reviewLikeRepository.save(ReviewLike.builder()
+                                .review(review)
+                                .user(user)
+                                .build())
+                );
+    }
+
     private Pageable createPageable(String sortType, int page, int size) {
         Sort sort = switch (sortType.toUpperCase()) {
             case "LATEST" -> Sort.by(Sort.Direction.DESC, "createdAt");

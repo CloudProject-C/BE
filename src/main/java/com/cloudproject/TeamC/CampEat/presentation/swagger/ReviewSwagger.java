@@ -68,4 +68,13 @@ public interface ReviewSwagger {
             @Parameter(description = "현재 로그인한 사용자 ID (비로그인 시 생략 가능)")
             @RequestParam(required = false) Long userId
     );
+
+    @Operation(summary = "리뷰 좋아요 (토글)", description = "리뷰에 좋아요를 누르거나 취소합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공")
+    })
+    CommonResponse<Void> toggleReviewLike(
+            @Parameter(description = "리뷰 ID", example = "10") @PathVariable Long reviewId,
+            @Parameter(description = "유저 ID") @RequestParam Long userId
+    );
 }

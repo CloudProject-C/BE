@@ -56,4 +56,15 @@ public class ReviewController implements ReviewSwagger {
 
         return CommonResponse.success(FETCH_REVIEW_SUCCESS, response);
     }
+
+    @Override
+    @PostMapping("/{reviewId}/like")
+    public CommonResponse<Void> toggleReviewLike(
+            @PathVariable Long reviewId,
+            @RequestParam Long userId
+    ) {
+        // TODO: 로그인 생기면 userId 다시
+        reviewService.toggleReviewLike(reviewId, userId);
+        return CommonResponse.success(REVIEW_LIKE_TOGGLE_SUCCESS);
+    }
 }
