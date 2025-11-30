@@ -8,7 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "user_preference")
+@Table(
+        name = "user_preference",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"user_id", "category"}
+        )
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserPreference extends BaseEntity {

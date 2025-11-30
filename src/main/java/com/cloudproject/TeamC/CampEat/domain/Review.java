@@ -51,5 +51,10 @@ public class Review extends BaseEntity {
     public void hide() {
         this.isHidden = true;
     }
+
+    public void addImage(ReviewImage image) {
+        this.images.add(image);
+        image.setReview(this);
+    }
 }
 
