@@ -9,14 +9,18 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    Page<Review> findAllByPlaceIdAndIsHiddenFalse(Long placeId, Pageable pageable);
+    @Query("SELECT r, COUNT(rl) FROM Review r " +
+            "LEFT JOIN ReviewLike rl ON rl.review = r " +
+            "WHERE r.place.id = :placeId AND r.isHidden = false " +
+            "GROUP BY r")
+    Page<Object[]> findReviewsWithLikeCount(@Param("placeId") Long placeId, Pageable pageable);
 
-    @Query("SELECT r FROM Review r " +
+    @Query("SELECT r, COUNT(rl) FROM Review r " +
             "LEFT JOIN ReviewLike rl ON rl.review = r " +
             "WHERE r.place.id = :placeId AND r.isHidden = false " +
             "GROUP BY r " +
             "ORDER BY COUNT(rl) DESC, r.createdAt DESC")
-    Page<Review> findAllByPlaceIdOrderByLikesDesc(@Param("placeId") Long placeId, Pageable pageable);
+    Page<Object[]> findReviewsWithLikeCountOrderByLikesDesc(@Param("placeId") Long placeId, Pageable pageable);
 
     @Query("SELECT COUNT(rl) FROM ReviewLike rl WHERE rl.review.id = :reviewId")
     long countLikesByReviewId(@Param("reviewId") Long reviewId);

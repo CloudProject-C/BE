@@ -38,7 +38,7 @@ public class S3Service {
             s3Template.upload(bucket, s3FileName, inputStream, ObjectMetadata.builder().contentType(file.getContentType()).build());
 
             // 업로드된 파일의 URL 반환
-            return s3Template.download(bucket, s3FileName).getURL().toString();
+            return String.format("https://%s.s3.amazonaws.com/%s", bucket, s3FileName);
 
         } catch (IOException e) {
             log.error("S3 Upload Error: {}", e.getMessage());

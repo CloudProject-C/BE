@@ -47,7 +47,7 @@ public class ReviewService {
         }
 
         // 3. [검증] 학교 근처인지 확인 (거리 계산)
-        validateSchoolProximity(user.getSchool(), place);
+        // validateSchoolProximity(user.getSchool(), place);
 
         // 4. 리뷰 저장
         Review review = Review.builder()
@@ -84,17 +84,19 @@ public class ReviewService {
 
     public Page<ReviewResponse> getReviews(Long placeId, String sortType, int page, int size, Long currentUserId) {
         Pageable pageable = createPageable(sortType, page, size);
-        Page<Review> reviewPage;
+
+        Page<Object[]> reviewPage;
 
         if ("LIKES".equalsIgnoreCase(sortType)) {
-            reviewPage = reviewRepository.findAllByPlaceIdOrderByLikesDesc(placeId, PageRequest.of(page, size));
+            reviewPage = reviewRepository.findReviewsWithLikeCountOrderByLikesDesc(placeId, PageRequest.of(page, size));
         } else {
-            reviewPage = reviewRepository.findAllByPlaceIdAndIsHiddenFalse(placeId, pageable);
+            reviewPage = reviewRepository.findReviewsWithLikeCount(placeId, pageable);
         }
 
         // currentUserId를 DTO 생성 메서드에 전달
-        return reviewPage.map(review -> {
-            long likeCount = reviewRepository.countLikesByReviewId(review.getId());
+        return reviewPage.map(result -> {
+            Review review = (Review) result[0];
+            Long likeCount = (Long) result[1];
             return ReviewResponse.from(review, likeCount, currentUserId);
         });
     }

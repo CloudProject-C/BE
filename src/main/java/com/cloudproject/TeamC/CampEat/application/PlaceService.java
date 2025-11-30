@@ -25,7 +25,8 @@ public class PlaceService {
     private final PlaceRepository placeRepository;
     private final ReviewRepository reviewRepository;
 
-    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    private static final int WGS84_SRID = 4326;
+    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
 
     public PlaceDetailResponse getPlaceDetail(Long placeId, Double userLat, Double userLon) {
         // 1. 장소 조회

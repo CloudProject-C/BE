@@ -5,10 +5,9 @@ import com.cloudproject.TeamC.CampEat.dto.request.ReviewCreateRequest;
 import com.cloudproject.TeamC.CampEat.dto.response.ReviewResponse;
 import com.cloudproject.TeamC.CampEat.presentation.swagger.ReviewSwagger;
 import com.cloudproject.TeamC.global.common.CommonResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,20 +23,20 @@ public class ReviewController implements ReviewSwagger {
     private final ReviewService reviewService;
 
     @Override
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public CommonResponse<List<String>> createReview(
-            @RequestPart("request") String requestJson,
+            @Valid @RequestPart("request") ReviewCreateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
         // TODO: SecurityContext에서 실제 로그인한 userId를 가져오도록 수정 필요
         Long mockUserId = 1L;
 
-        ReviewCreateRequest request;
-        try {
-            request = new ObjectMapper().readValue(requestJson, ReviewCreateRequest.class);
-        } catch (Exception e) {
-            throw new RuntimeException("JSON 파싱 실패: " + e.getMessage());
-        }
+//        ReviewCreateRequest request;
+//        try {
+//            request = new ObjectMapper().readValue(requestJson, ReviewCreateRequest.class);
+//        } catch (Exception e) {
+//            throw new RuntimeException("JSON 파싱 실패: " + e.getMessage());
+//        }
         List<String> uploadImageUrls = reviewService.createReview(mockUserId, request, images);
         return CommonResponse.success(REVIEW_CREATE_SUCCESS, uploadImageUrls);
     }
