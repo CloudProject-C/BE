@@ -37,8 +37,8 @@ public class MainService {
         // 3. 학교 소속 리뷰 수
         Long reviewCount = reviewRepository.countBySchoolId(schoolId);
 
-        // 4. 학교 근처 음식점 수 (예: 반경 2km 이내)
-        Long placeCount = placeRepository.countPlacesNearSchool(school.getCampusLocation(), 2000.0);
+        // 4. 학교 근처 음식점 수
+        Long placeCount = placeRepository.countBySchoolId(schoolId);
 
         return MainPageResponse.builder()
                 .schoolName(schoolName)
