@@ -1,6 +1,7 @@
 package com.cloudproject.TeamC.CampEat.dto.response;
 
 import com.cloudproject.TeamC.CampEat.domain.Place;
+import com.cloudproject.TeamC.global.util.DtoUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -53,7 +54,7 @@ public record PlaceDetailResponse(
         return PlaceDetailResponse.builder()
                 .placeId(place.getId())
                 .placeName(place.getPlaceName())
-                .categoryName(extractSimpleCategory(place.getCategoryName()))
+                .categoryName(DtoUtil.extractSimpleCategory(place.getCategoryName()))
                 .phone(place.getPhone())
                 .addressName(place.getAddressName())
                 .roadAddressName(place.getRoadAddressName())
@@ -65,22 +66,5 @@ public record PlaceDetailResponse(
                 .placeLikeCount(placeLikeCount)
                 .isLiked(isLiked)
                 .build();
-    }
-
-    private static String extractSimpleCategory(String fullCategoryName) {
-        if (fullCategoryName == null || fullCategoryName.isBlank()) {
-            return "기타";
-        }
-        // " > " 기준으로 문자열 분리
-        String[] categories = fullCategoryName.split(" > ");
-
-        // 길이가 2 이상이면 두 번째(인덱스 1) 요소 반환
-        // 예: "음식점 > 카페 > 테마카페" -> "카페"
-        if (categories.length > 1) {
-            return categories[1];
-        }
-
-        // " > "가 없거나 구조가 다르면 전체 반환
-        return fullCategoryName;
     }
 }

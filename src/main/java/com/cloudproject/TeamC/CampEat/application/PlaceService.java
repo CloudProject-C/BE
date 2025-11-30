@@ -19,14 +19,10 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,16 +51,11 @@ public class PlaceService {
         long likeCount = placeLikeRepository.countByPlace(place);
         boolean isLiked = false;
         if (userId != null) {
-            // 유저 정보를 매번 조회하기보다 ID로 바로 체크 (최적화)
-            // existsByPlaceIdAndUserId 같은 메서드를 repo에 추가하거나, user 객체 조회 후 사용
-            User user = userRepository.findById(userId).orElse(null);
-            if (user != null) {
-                isLiked = placeLikeRepository.existsByPlaceAndUser(place, user);
-            }
+            isLiked = placeLikeRepository.existsByPlace_IdAndUser_Id(placeId, userId);
         }
 
         // 3. 거리 계산 (사용자 위치가 제공된 경우)
-        Integer calculatedDistance = place.getDistance(); // 기본값
+        Integer calculatedDistance = place.getDistance();
 
         if (userLat != null && userLon != null && place.getLocation() != null) {
             // 사용자 위치를 Point 객체로 변환 (x: 경도, y: 위도 순서 주의)
@@ -90,53 +81,50 @@ public class PlaceService {
         // 3. 반경 내 장소 조회 (DB)
         List<Place> places = placeRepository.findPlacesNearby(userPoint, radius, categoryKeyword);
 
-        Set<Long> likedPlaceIds = new HashSet<>();
-        if (userId != null && !places.isEmpty()) {
-            List<Long> placeIds = places.stream().map(Place::getId).toList();
-            likedPlaceIds.addAll(placeLikeRepository.findLikedPlaceIds(userId, placeIds));
+        if (places.isEmpty()) {
+            return List.of();
         }
 
-        // 4. 데이터 가공 (거리 계산 및 이미지 매핑)
-        List<PlaceMapResponse> responses = places.stream()
+        List<Long> placeIds = places.stream().map(Place::getId).toList();
+
+        // 4. 배치 쿼리 실행 (Sub Queries 4~5회)
+        // 4-1. 리뷰 개수 Map 생성
+        Map<Long, Long> reviewCountMap = reviewRepository.countReviewsByPlaceIds(placeIds).stream()
+                .collect(Collectors.toMap(obj -> (Long) obj[0], obj -> (Long) obj[1]));
+
+        // 4-2. 평균 평점 Map 생성
+        Map<Long, Double> ratingMap = reviewRepository.findAverageRatingsByPlaceIds(placeIds).stream()
+                .collect(Collectors.toMap(obj -> (Long) obj[0], obj -> (Double) obj[1]));
+
+        // 4-3. 최신 이미지 Map 생성
+        Map<Long, String> imageMap = reviewRepository.findLatestReviewImagesByPlaceIds(placeIds).stream()
+                .collect(Collectors.toMap(obj -> (Long) obj[0], obj -> (String) obj[1]));
+
+        // 4-4. 장소 찜 개수 Map 생성
+        Map<Long, Long> placeLikeCountMap = placeLikeRepository.countLikesByPlaceIds(placeIds).stream()
+                .collect(Collectors.toMap(obj -> (Long) obj[0], obj -> (Long) obj[1]));
+
+        Set<Long> myLikedPlaceIds = new HashSet<>();
+        if (userId != null) {
+            myLikedPlaceIds.addAll(placeLikeRepository.findLikedPlaceIds(userId, placeIds));
+        }
+
+        return places.stream()
                 .map(place -> {
-                    // 거리 계산
                     double distanceKm = LocationUtil.calculateDistance(userPoint, place.getLocation());
                     int distanceM = (int) (distanceKm * 1000);
 
-                    // 최신 리뷰 이미지 조회 (LIMIT 1)
-                    List<String> images = reviewRepository.findLatestReviewImageByPlaceId(place.getId(), PageRequest.of(0, 1));
-                    String imageUrl = images.isEmpty() ? null : images.get(0);
-
-                    // 정렬을 위한 추가 정보 조회 (필요 시 Batch Fetch 최적화 고려)
-                    Long reviewCount = reviewRepository.countByPlaceIdAndIsHiddenFalse(place.getId());
-                    Double rating = reviewRepository.findAverageRatingByPlaceId(place.getId());
-                    if (rating == null) rating = 0.0;
-
-                    long placeLikeCount = placeLikeRepository.countByPlace(place);
-
-                    boolean isLiked = likedPlaceIds.contains(place.getId());
+                    // Map에서 조회 (없으면 기본값)
+                    String imageUrl = imageMap.get(place.getId());
+                    Long reviewCount = reviewCountMap.getOrDefault(place.getId(), 0L);
+                    Double rating = ratingMap.getOrDefault(place.getId(), 0.0);
+                    Long placeLikeCount = placeLikeCountMap.getOrDefault(place.getId(), 0L);
+                    boolean isLiked = myLikedPlaceIds.contains(place.getId());
 
                     return PlaceMapResponse.of(place, distanceM, imageUrl, reviewCount, rating, placeLikeCount, isLiked);
                 })
+                .sorted(getComparator(sort)) // 정렬
                 .collect(Collectors.toList());
-
-        // 5. 정렬 (Java Stream)
-        // 정렬 기준: LATEST(거리순?), LIKES(평점순/리뷰순?), REVIEW(리뷰많은순)
-        if ("LIKES".equalsIgnoreCase(sort) || "RATING".equalsIgnoreCase(sort)) {
-            // 평점 높은 순 -> 리뷰 많은 순
-            responses.sort(Comparator.comparing(PlaceMapResponse::rating).reversed()
-                    .thenComparing(Comparator.comparing(PlaceMapResponse::reviewCount).reversed()));
-        } else if ("REVIEW".equalsIgnoreCase(sort)) {
-            // 리뷰 많은 순
-            responses.sort(Comparator.comparing(PlaceMapResponse::reviewCount).reversed());
-        } else {
-            // 기본: 거리 가까운 순 (LATEST 등)
-            responses.sort(Comparator.comparing(PlaceMapResponse::distance));
-        }
-
-        // TODO: AI 추천순은 추후 구현
-
-        return responses;
     }
 
     @Transactional
@@ -156,6 +144,21 @@ public class PlaceService {
                                 .user(user)
                                 .build())
                 );
+    }
+
+    private Comparator<PlaceMapResponse> getComparator(String sortType) {
+        return switch (sortType.toUpperCase()) {
+            // [평점순] 평점이 높은 순 -> 리뷰가 많은 순
+            case "RATING", "LIKES" -> Comparator.comparing(PlaceMapResponse::rating).reversed()
+                    .thenComparing(Comparator.comparing(PlaceMapResponse::reviewCount).reversed());
+
+            // [리뷰순] 리뷰가 많은 순 -> 평점이 높은 순
+            case "REVIEW" -> Comparator.comparing(PlaceMapResponse::reviewCount).reversed()
+                    .thenComparing(Comparator.comparing(PlaceMapResponse::rating).reversed());
+
+            // [기본] 거리 가까운 순 (DISTANCE, LATEST 등)
+            default -> Comparator.comparing(PlaceMapResponse::distance);
+        };
     }
 
     private String mapCategoryToKeyword(FoodCategory category) {
