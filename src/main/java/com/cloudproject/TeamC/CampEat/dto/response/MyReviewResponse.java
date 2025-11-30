@@ -1,7 +1,6 @@
 package com.cloudproject.TeamC.CampEat.dto.response;
 
 import com.cloudproject.TeamC.CampEat.domain.Review;
-import com.cloudproject.TeamC.CampEat.domain.ReviewImage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 

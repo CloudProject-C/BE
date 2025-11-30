@@ -4,7 +4,6 @@ import com.cloudproject.TeamC.CampEat.application.MainService;
 import com.cloudproject.TeamC.CampEat.dto.response.MainPageResponse;
 import com.cloudproject.TeamC.CampEat.presentation.swagger.MainSwagger;
 import com.cloudproject.TeamC.global.common.CommonResponse;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
