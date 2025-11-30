@@ -38,16 +38,22 @@ public record PlaceDetailResponse(
         Long reviewCount,
 
         @Schema(description = "선호도 퍼센트 (Qdrant 코사인 유사도)", example = "null")
-        Integer preferencePercent
+        Integer preferencePercent,
+
+        @Schema(description = "장소 좋아요(찜) 수", example = "5")
+        Long placeLikeCount,
+
+        @Schema(description = "내가 좋아요 한 여부", example = "true")
+        boolean isLiked
 ) {
-    public static PlaceDetailResponse of(Place place, Double averageRating, Long reviewCount, Integer calculatedDistance) {
+    public static PlaceDetailResponse of(Place place, Double averageRating, Long reviewCount, Integer calculatedDistance, Long placeLikeCount, boolean isLiked) {
         // 평점이 없으면 0.0 처리
         double rating = (averageRating != null) ? averageRating : 0.0;
 
         return PlaceDetailResponse.builder()
                 .placeId(place.getId())
                 .placeName(place.getPlaceName())
-                .categoryName(place.getCategoryName())
+                .categoryName(extractSimpleCategory(place.getCategoryName()))
                 .phone(place.getPhone())
                 .addressName(place.getAddressName())
                 .roadAddressName(place.getRoadAddressName())
@@ -56,6 +62,25 @@ public record PlaceDetailResponse(
                 .averageRating(Math.round(rating * 10.0) / 10.0)
                 .reviewCount(reviewCount)
                 .preferencePercent(null) // TODO: 추후 Qdrant 검색 결과와 연동하여 값 주입 필요
+                .placeLikeCount(placeLikeCount)
+                .isLiked(isLiked)
                 .build();
+    }
+
+    private static String extractSimpleCategory(String fullCategoryName) {
+        if (fullCategoryName == null || fullCategoryName.isBlank()) {
+            return "기타";
+        }
+        // " > " 기준으로 문자열 분리
+        String[] categories = fullCategoryName.split(" > ");
+
+        // 길이가 2 이상이면 두 번째(인덱스 1) 요소 반환
+        // 예: "음식점 > 카페 > 테마카페" -> "카페"
+        if (categories.length > 1) {
+            return categories[1];
+        }
+
+        // " > "가 없거나 구조가 다르면 전체 반환
+        return fullCategoryName;
     }
 }

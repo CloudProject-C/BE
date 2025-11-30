@@ -24,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,7 +43,7 @@ public class PlaceService {
     private static final int WGS84_SRID = 4326;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
 
-    public PlaceDetailResponse getPlaceDetail(Long placeId, Double userLat, Double userLon) {
+    public PlaceDetailResponse getPlaceDetail(Long placeId, Double userLat, Double userLon, Long userId) {
         // 1. 장소 조회
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new CampEatException(CampEatErrorCode.PLACE_NOT_FOUND));
@@ -49,6 +51,17 @@ public class PlaceService {
         // 2. 리뷰 통계 조회
         Double averageRating = reviewRepository.findAverageRatingByPlaceId(placeId);
         Long reviewCount = reviewRepository.countByPlaceIdAndIsHiddenFalse(placeId);
+
+        long likeCount = placeLikeRepository.countByPlace(place);
+        boolean isLiked = false;
+        if (userId != null) {
+            // 유저 정보를 매번 조회하기보다 ID로 바로 체크 (최적화)
+            // existsByPlaceIdAndUserId 같은 메서드를 repo에 추가하거나, user 객체 조회 후 사용
+            User user = userRepository.findById(userId).orElse(null);
+            if (user != null) {
+                isLiked = placeLikeRepository.existsByPlaceAndUser(place, user);
+            }
+        }
 
         // 3. 거리 계산 (사용자 위치가 제공된 경우)
         Integer calculatedDistance = place.getDistance(); // 기본값
@@ -64,10 +77,10 @@ public class PlaceService {
         log.info("User: lat={}, lon={}", userLat, userLon);
         log.info("Place: lat(Y)={}, lon(X)={}", place.getLocation().getY(), place.getLocation().getX());
         // 4. 반환
-        return PlaceDetailResponse.of(place, averageRating, reviewCount, calculatedDistance);
+        return PlaceDetailResponse.of(place, averageRating, reviewCount, calculatedDistance, likeCount, isLiked);
     }
 
-    public List<PlaceMapResponse> getPlacesNearby(Double lat, Double lon, Double radius, String sort, FoodCategory category) {
+    public List<PlaceMapResponse> getPlacesNearby(Long userId, Double lat, Double lon, Double radius, String sort, FoodCategory category) {
         // 1. 사용자 위치 Point 생성
         Point userPoint = geometryFactory.createPoint(new Coordinate(lon, lat));
 
@@ -76,6 +89,12 @@ public class PlaceService {
 
         // 3. 반경 내 장소 조회 (DB)
         List<Place> places = placeRepository.findPlacesNearby(userPoint, radius, categoryKeyword);
+
+        Set<Long> likedPlaceIds = new HashSet<>();
+        if (userId != null && !places.isEmpty()) {
+            List<Long> placeIds = places.stream().map(Place::getId).toList();
+            likedPlaceIds.addAll(placeLikeRepository.findLikedPlaceIds(userId, placeIds));
+        }
 
         // 4. 데이터 가공 (거리 계산 및 이미지 매핑)
         List<PlaceMapResponse> responses = places.stream()
@@ -95,7 +114,9 @@ public class PlaceService {
 
                     long placeLikeCount = placeLikeRepository.countByPlace(place);
 
-                    return PlaceMapResponse.of(place, distanceM, imageUrl, reviewCount, rating, placeLikeCount);
+                    boolean isLiked = likedPlaceIds.contains(place.getId());
+
+                    return PlaceMapResponse.of(place, distanceM, imageUrl, reviewCount, rating, placeLikeCount, isLiked);
                 })
                 .collect(Collectors.toList());
 

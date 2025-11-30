@@ -23,14 +23,17 @@ public interface PlaceSwagger {
             @ApiResponse(responseCode = "400", description = "잘못된 장소 ID")
     })
     CommonResponse<PlaceDetailResponse> getPlaceDetail(
-            @Parameter(description = "장소 ID", example = "1", required = true)
+            @Parameter(description = "장소 ID", example = "7724465", required = true)
             @PathVariable Long placeId,
 
-            @Parameter(description = "사용자 위도 (Latitude)", example = "37.5665")
+            @Parameter(description = "사용자 위도 (Latitude)", example = "37.251")
             @RequestParam(required = false) Double latitude,
 
-            @Parameter(description = "사용자 경도 (Longitude)", example = "126.9780")
-            @RequestParam(required = false) Double longitude
+            @Parameter(description = "사용자 경도 (Longitude)", example = "127.078")
+            @RequestParam(required = false) Double longitude,
+
+            @Parameter(description = "유저 ID")
+            @RequestParam(required = false) Long userId
     );
 
     @Operation(summary = "내 주변 음식점 조회 (지도/리스트)", description = "현재 위치 기준 반경 내 음식점을 필터링하여 조회합니다.")
@@ -50,8 +53,11 @@ public interface PlaceSwagger {
             @Parameter(description = "정렬 (DISTANCE: 거리순, LIKES: 평점순, REVIEW: 리뷰많은순)", example = "DISTANCE")
             @RequestParam(defaultValue = "DISTANCE") String sort,
 
-            @Parameter(description = "카테고리 필터 (KOREAN, WESTERN 등)", required = false)
-            @RequestParam(required = false) FoodCategory category
+            @Parameter(description = "카테고리 필터 (KOREAN, WESTERN 등)")
+            @RequestParam(required = false) FoodCategory category,
+
+            @Parameter(description = "유저 ID")
+            @RequestParam(required = false) Long userId
     );
 
     @Operation(summary = "음식점 찜하기 (토글)", description = "음식점을 찜하거나 취소합니다.")
