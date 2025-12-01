@@ -33,6 +33,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+  
+	//json
+	implementation 'org.json:json:20240303'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
 
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
