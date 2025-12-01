@@ -1,5 +1,6 @@
 package com.cloudproject.TeamC.CampEat.presentation;
 
+import org.springframework.http.ResponseEntity;
 import com.cloudproject.TeamC.CampEat.domain.FoodCategory;
 import com.cloudproject.TeamC.CampEat.dto.response.PlaceDetailResponse;
 import com.cloudproject.TeamC.CampEat.application.PlaceService;
@@ -56,5 +57,23 @@ public class PlaceController implements PlaceSwagger {
         // TODO: 로그인 생기면 userId 다시
         placeService.togglePlaceLike(placeId, userId);
         return CommonResponse.success(PLACE_LIKE_TOGGLE_SUCCESS);
+    }
+  
+   @GetMapping("/change")
+    public String change(){
+        placeService.importPlacesFromJson("kakao_places.json");
+        return "db에 저장완료";
+    }
+
+    @PostMapping("/{id}/embed")
+    public ResponseEntity<Void> embed(@PathVariable Long id) {
+        placeService.processPlace(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/embed-all")
+    public ResponseEntity<Void> embedAll() {
+        placeService.processAllPlaces();
+        return ResponseEntity.ok().build();
     }
 }

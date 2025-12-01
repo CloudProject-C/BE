@@ -2,6 +2,7 @@ package com.cloudproject.TeamC.CampEat.domain;
 
 import com.cloudproject.TeamC.global.domain.BaseEntity;
 
+
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

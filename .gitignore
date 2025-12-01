@@ -5,7 +5,11 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 .env
+
+
+init.sql
 .init.sql
+
 
 ### application.yml ###
 application.yml
