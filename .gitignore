@@ -9,7 +9,7 @@ build/
 
 init.sql
 .init.sql
-
+kakao_places.json
 
 ### application.yml ###
 application.yml
