@@ -72,8 +72,11 @@ public class PlaceController implements PlaceSwagger {
     }
 
     @PostMapping("/embed-all")
-    public ResponseEntity<Void> embedAll() {
-        placeService.processAllPlaces();
+    public ResponseEntity<Void> embedAll(
+            @RequestParam(defaultValue = "20") int batchSize,
+            @RequestParam(defaultValue = "1000") long delayMillis
+    ) {
+        placeService.processAllPlacesInBatches(batchSize, delayMillis);
         return ResponseEntity.ok().build();
     }
 }
