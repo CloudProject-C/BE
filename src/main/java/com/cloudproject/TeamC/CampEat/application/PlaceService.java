@@ -268,12 +268,47 @@ public class PlaceService {
     }
 
     @Transactional
-    public void processAllPlaces() {
+    public void processAllPlacesInBatches(int batchSize, long delayMillis) {
         List<Place> places = placeRepository.findAll();
+        int total = places.size();
 
-        for (Place place : places) {
-            // placeId 기준으로 기존 로직 재사용
-            processPlace(place.getId());
+        for (int i = 0; i < total; i += batchSize) {
+            int end = Math.min(i + batchSize, total);
+            List<Place> batch = places.subList(i, end);
+
+            for (Place place : batch) {
+                try {
+                    processPlaceWithRetry(place.getId(), 3); // 재시도 최대 3번
+                    Thread.sleep(delayMillis); // 호출 사이 딜레이
+                } catch (Exception e) {
+                    log.error("Place {} 처리 실패, 스킵합니다.", place.getId(), e);
+                }
+            }
+        }
+    }
+
+    private void processPlaceWithRetry(Long id, int maxRetries) {
+        int attempt = 0;
+        long backoff = 2_000L; // 2초부터 시작
+
+        while (true) {
+            try {
+                processPlace(id);
+                return;
+            } catch (RuntimeException e) {
+                // Gemini 503 등 외부 API 에러만 재시도하고, 나머지는 바로 throw 해도 됨
+                attempt++;
+                if (attempt > maxRetries) {
+                    throw e;
+                }
+                try {
+                    Thread.sleep(backoff);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+                backoff *= 2; // exponential backoff
+            }
         }
     }
 }
