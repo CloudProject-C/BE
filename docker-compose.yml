@@ -17,7 +17,7 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.13.4
     container_name: qdrant
     restart: unless-stopped
     ports:
@@ -25,6 +25,15 @@ services:
     volumes:
       - qdrant-storage:/qdrant/storage
 
+
+  cache-server:
+    image: redis:7.4
+    container_name: my-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
 volumes:
   mysql-data:
   qdrant-storage:
+
