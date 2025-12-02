@@ -60,8 +60,8 @@ public class PlaceController implements PlaceSwagger {
     }
   
    @GetMapping("/change")
-    public String change(){
-        placeService.importPlacesFromJson("kakao_places.json");
+    public String change(@PathVariable Long userId){
+        placeService.importPlacesFromJson("kakao_places.json",userId);
         return "db에 저장완료";
     }
 

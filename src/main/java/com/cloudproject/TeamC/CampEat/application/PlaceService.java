@@ -1,23 +1,19 @@
 package com.cloudproject.TeamC.CampEat.application;
 
 
-import com.cloudproject.TeamC.CampEat.infrastructure.persistence.PlaceRepository;
+import com.cloudproject.TeamC.CampEat.domain.*;
+import com.cloudproject.TeamC.CampEat.infrastructure.repository.PlaceRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
-import com.cloudproject.TeamC.CampEat.domain.FoodCategory;
-import com.cloudproject.TeamC.CampEat.domain.Place;
-import com.cloudproject.TeamC.CampEat.domain.PlaceLike;
-import com.cloudproject.TeamC.CampEat.domain.User;
 import com.cloudproject.TeamC.CampEat.dto.response.PlaceDetailResponse;
 import com.cloudproject.TeamC.CampEat.dto.response.PlaceMapResponse;
 import com.cloudproject.TeamC.CampEat.exception.CampEatException;
 import com.cloudproject.TeamC.CampEat.exception.code.CampEatErrorCode;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.PlaceLikeRepository;
-import com.cloudproject.TeamC.CampEat.infrastructure.repository.PlaceRepository;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.ReviewRepository;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.UserRepository;
 import com.cloudproject.TeamC.global.util.LocationUtil;
@@ -184,8 +180,13 @@ public class PlaceService {
     }
   
     
-    public List<Place> parsePlacesFromJsonFile(String filePath) {
+    public List<Place> parsePlacesFromJsonFile(String filePath, Long userId) {
         List<Place> result = new ArrayList<>();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        School school = user.getSchool();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             StringBuilder sb = new StringBuilder();
@@ -203,8 +204,20 @@ public class PlaceService {
                 for (int j = 0; j < places.length(); j++) {
                     JSONObject p = places.getJSONObject(j);
 
+                    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+
+                    Double lon = p.has("x") ? p.getDouble("x") : null; // longitude
+                    Double lat = p.has("y") ? p.getDouble("y") : null; // latitude
+
+                    Point location = null;
+                    if (lon != null && lat != null) {
+                        location = geometryFactory.createPoint(new Coordinate(lon, lat));
+                        location.setSRID(4326);
+                    }
+
                     Place place = Place.builder()
                             .id(Long.parseLong(p.getString("id")))
+                            .school(school) // school 넣어야 함 (없으면 NPE)
                             .placeName(p.optString("place_name", null))
                             .categoryGroupCode(p.optString("category_group_code", null))
                             .categoryGroupName(p.optString("category_group_name", null))
@@ -212,15 +225,13 @@ public class PlaceService {
                             .phone(p.optString("phone", null))
                             .addressName(p.optString("address_name", null))
                             .roadAddressName(p.optString("road_address_name", null))
-                            .x(p.has("x") ? p.getDouble("x") : null)
-                            .y(p.has("y") ? p.getDouble("y") : null)
-                            .distance(
-                                    p.has("distance")
-                                            ? Integer.parseInt(p.optString("distance", "0"))
-                                            : 0
-                            )
+                            .location(location)
+                            .distance(p.has("distance")
+                                    ? Integer.parseInt(p.optString("distance", "0"))
+                                    : 0)
                             .placeUrl(p.optString("place_url", null))
                             .build();
+
 
                     result.add(place);
                 }
@@ -233,8 +244,8 @@ public class PlaceService {
     }
 
 
-    public void importPlacesFromJson(String filePath) {
-        List<Place> places = parsePlacesFromJsonFile(filePath);
+    public void importPlacesFromJson(String filePath, Long userId) {
+        List<Place> places = parsePlacesFromJsonFile(filePath, userId);
         placeRepository.saveAll(places);
     }
 
