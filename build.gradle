@@ -27,12 +27,18 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// jwt
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
   
 	//json
 	implementation 'org.json:json:20240303'
@@ -46,11 +52,13 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	// Gemini (Google GenAI Java SDK)
-	//json
+	// json
 	implementation 'org.json:json:20240303'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
+	// email
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 	// point
 	implementation 'org.hibernate.orm:hibernate-spatial'
@@ -58,6 +66,11 @@ dependencies {
 
 	// s3
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.0'
+
+	//redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+
 }
 
 tasks.named('test') {
