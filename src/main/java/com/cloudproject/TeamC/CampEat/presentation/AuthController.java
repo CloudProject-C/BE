@@ -26,6 +26,23 @@ import static com.cloudproject.TeamC.global.common.code.SuccessCode.VERIFY_EMAIL
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailService emailService;
+
+    @PostMapping("/email/send-email")
+    public CommonResponse<String> sendEmail(@RequestParam String email) throws Exception {
+        return CommonResponse.success(SEND_EMAIL_SUCCESS, emailService.sendMessage(email));
+    }
+
+    @PostMapping("/email/verify")
+    public CommonResponse<String> verifyCode(@RequestBody EmailVerifyRequest requestDto) {
+        boolean check = emailService.verifyCode(requestDto);
+        if (check) {
+            return CommonResponse.success(VERIFY_EMAIL_SUCCESSS,"인증 완료!");
+        }
+        else {
+            return CommonResponse.failure(BAD_REQUEST, "인증 실패");
+        }
+    }
 
 
     @PostMapping("/join")
