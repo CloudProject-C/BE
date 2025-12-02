@@ -33,4 +33,15 @@ public class AuthService {
         User user = userJoinRequestDto.toEntity(school, passwordEncoder);
         userRepository.save(user);
     }
+
+    public String login(String email, String userPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(userPassword, user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return jwtTokenProvider.createToken(email);
+    }
 }

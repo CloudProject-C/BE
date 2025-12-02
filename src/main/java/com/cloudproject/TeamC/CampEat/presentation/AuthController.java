@@ -34,5 +34,15 @@ public class AuthController {
         return ResponseEntity.ok("Registration successful");
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody UserLoginRequest userLoginDto) {
+        try {
+            String token = authService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
+            return ResponseEntity.ok(token);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body("Invalid password");
+        }
+    }
+
 
 }
