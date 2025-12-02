@@ -60,8 +60,8 @@ public class PreferenceService {
             combined[i] = alpha * newEmbedding[i] + beta * oldEmbedding[i];
         }
 
-        List<QdrantSearchHit> top3 = qdrantService.searchTopNInRestaurants(combined, 3);
-        recommendationStore.saveUserRecommendations(userId, top3);
+        List<QdrantSearchHit> top = qdrantService.searchTopNInRestaurants(combined, 1000);
+        recommendationStore.saveUserRecommendations(userId, top);
     }
 
 
