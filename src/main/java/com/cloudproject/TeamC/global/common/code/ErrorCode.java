@@ -14,6 +14,8 @@ public enum ErrorCode implements BaseCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+    UNABLE_TO_SEND_EMAIL(HttpStatus.FORBIDDEN, "이메일을 전송할 수 없습니다."),
+    CODE_IS_NOT_VALID(HttpStatus.FORBIDDEN, "코드가 유효하지 않습니다."),
     ;
 
     private final HttpStatus httpStatus;

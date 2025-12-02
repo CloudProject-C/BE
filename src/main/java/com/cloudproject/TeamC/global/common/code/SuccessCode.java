@@ -19,7 +19,9 @@ public enum SuccessCode implements BaseCode{
     FETCH_MAIN_PAGE_SUCCESS(HttpStatus.OK, "메인 페이지 조회가 성공적으로 완료되었습니다."),
     FETCH_MY_PAGE_SUCCESS(HttpStatus.OK, "마이 페이지 조회가 성공적으로 완료되었습니다."),
     FETCH_MY_REVIEWS_SUCCESS(HttpStatus.OK, "내가 쓴 리뷰 목록 조회가 성공적으로 완료되었습니다."),
-    FETCH_MY_LIKED_PLACES_SUCCESS(HttpStatus.OK, "내가 좋아요한 음식점 목록 조회가 성공적으로 완료되었습니다.")
+    FETCH_MY_LIKED_PLACES_SUCCESS(HttpStatus.OK, "내가 좋아요한 음식점 목록 조회가 성공적으로 완료되었습니다."),
+    SEND_EMAIL_SUCCESS(HttpStatus.OK, "인증코드가 성공적으로 전송되었습니다."),
+    VERIFY_EMAIL_SUCCESSS(HttpStatus.OK, "코드 인증이 완료되었습니다.")
     ;
 
     private final HttpStatus httpStatus;
