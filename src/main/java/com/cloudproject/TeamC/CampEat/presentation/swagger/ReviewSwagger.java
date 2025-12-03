@@ -1,5 +1,6 @@
 package com.cloudproject.TeamC.CampEat.presentation.swagger;
 
+import com.cloudproject.TeamC.CampEat.domain.User;
 import com.cloudproject.TeamC.CampEat.dto.request.ReviewCreateRequest;
 import com.cloudproject.TeamC.CampEat.dto.response.ReviewResponse;
 import com.cloudproject.TeamC.global.common.CommonResponse;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -45,7 +47,8 @@ public interface ReviewSwagger {
                     description = "업로드 이미지 리스트",
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )
-            List<MultipartFile> images
+            List<MultipartFile> images,
+            @AuthenticationPrincipal User user
     );
 
     @Operation(summary = "리뷰 목록 조회", description = "장소에 대한 리뷰를 조건에 맞춰 조회합니다.")
@@ -65,8 +68,7 @@ public interface ReviewSwagger {
             @Parameter(description = "페이지 크기", example = "10")
             @RequestParam(defaultValue = "10") int size,
 
-            @Parameter(description = "유저 ID")
-            @RequestParam(required = false) Long userId
+            @AuthenticationPrincipal User user
     );
 
     @Operation(summary = "리뷰 좋아요 (토글)", description = "리뷰에 좋아요를 누르거나 취소합니다.")
@@ -74,5 +76,5 @@ public interface ReviewSwagger {
             @ApiResponse(responseCode = "200", description = "성공")
     })
     CommonResponse<Void> toggleReviewLike(
-            @Parameter(description = "리뷰 ID", example = "10") @PathVariable Long reviewId);
+            @Parameter(description = "리뷰 ID", example = "10") @PathVariable Long reviewId, @AuthenticationPrincipal User user);
 }

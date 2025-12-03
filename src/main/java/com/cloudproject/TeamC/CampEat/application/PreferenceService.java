@@ -22,8 +22,7 @@ public class PreferenceService {
 
 
     @Async("taskExecutor")
-    public void processOnboardingAsync(PreferenceRequest request) {
-        Long userId = request.getUserId();
+    public void processOnboardingAsync(PreferenceRequest request, Long userId) {
         List<String> features = request.getFeatures();
 
         try {
@@ -39,8 +38,7 @@ public class PreferenceService {
         }
     }
     @Async("taskExecutor")
-    public void recommendAsync(RecommendRequest request) {
-        Long userId = request.getUserId();
+    public void recommendAsync(RecommendRequest request, Long userId) {
         List<String> newFeatures = request.getFeatures();
 
         String newText = String.join(" ", newFeatures);

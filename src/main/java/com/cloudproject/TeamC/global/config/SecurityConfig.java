@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/v1/reviews").authenticated() // 인증만 필요
+                        .requestMatchers("/v1/reviews,/v1/preference,/v1/main,/v1/places,/v1/users").authenticated() // 인증만 필요
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(sessionManagement ->
