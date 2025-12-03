@@ -1,6 +1,7 @@
 package com.cloudproject.TeamC.CampEat.presentation;
 
 import com.cloudproject.TeamC.CampEat.application.UserService;
+import com.cloudproject.TeamC.CampEat.domain.User;
 import com.cloudproject.TeamC.CampEat.dto.response.MyLikedPlaceResponse;
 import com.cloudproject.TeamC.CampEat.dto.response.MyPageResponse;
 import com.cloudproject.TeamC.CampEat.dto.response.MyReviewResponse;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,10 +30,9 @@ public class UserController implements UserSwagger {
 
     @Override
     @GetMapping("/me")
-    public CommonResponse<MyPageResponse> getMyPage() {
-        // TODO: SecurityContext에서 userId
-        Long mockUserId = 1L;
-        return CommonResponse.success(FETCH_MY_PAGE_SUCCESS, userService.getMyPageInfo(mockUserId)); // SuccessCode는 적절한 것으로 대체 가능
+    public CommonResponse<MyPageResponse> getMyPage(@AuthenticationPrincipal User user) {
+        Long userId = user.getId();
+        return CommonResponse.success(FETCH_MY_PAGE_SUCCESS, userService.getMyPageInfo(userId)); // SuccessCode는 적절한 것으로 대체 가능
     }
 
     @Override
@@ -39,21 +40,23 @@ public class UserController implements UserSwagger {
     public CommonResponse<Page<MyReviewResponse>> getMyReviews(
             @RequestParam(defaultValue = "LATEST") String sort,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal User user
     ) {
-        Long mockUserId = 1L;
-        return CommonResponse.success(FETCH_MY_REVIEWS_SUCCESS, userService.getMyReviews(mockUserId, sort, page, size));
+        Long userId = user.getId();
+        return CommonResponse.success(FETCH_MY_REVIEWS_SUCCESS, userService.getMyReviews(userId, sort, page, size));
     }
 
     @Override
     @GetMapping("/me/likes")
     public CommonResponse<Page<MyLikedPlaceResponse>> getMyLikedPlaces(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal User user
     ) {
-        Long mockUserId = 1L;
+        Long userId = user.getId();
         // 찜한 순서(최신순) 정렬
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return CommonResponse.success(FETCH_MY_LIKED_PLACES_SUCCESS, userService.getMyLikedPlaces(mockUserId, pageRequest));
+        return CommonResponse.success(FETCH_MY_LIKED_PLACES_SUCCESS, userService.getMyLikedPlaces(userId, pageRequest));
     }
 }

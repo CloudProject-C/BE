@@ -178,15 +178,18 @@ public class PlaceService {
             // 필요에 따라 추가 매핑
         };
     }
-  
-    
-    public List<Place> parsePlacesFromJsonFile(String filePath, Long userId) {
-        List<Place> result = new ArrayList<>();
 
+    public List<Place> parsePlacesFromJsonFile(String filePath, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
 
         School school = user.getSchool();
+        if (school == null) {
+            throw new RuntimeException("User has no school: " + userId);
+        }
+
+        List<Place> result = new ArrayList<>();
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             StringBuilder sb = new StringBuilder();
@@ -204,20 +207,31 @@ public class PlaceService {
                 for (int j = 0; j < places.length(); j++) {
                     JSONObject p = places.getJSONObject(j);
 
-                    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-
-                    Double lon = p.has("x") ? p.getDouble("x") : null; // longitude
-                    Double lat = p.has("y") ? p.getDouble("y") : null; // latitude
+                    // Kakao API: x=경도(longitude), y=위도(latitude)
+                    Double lon = p.has("x") ? p.getDouble("x") : null;
+                    Double lat = p.has("y") ? p.getDouble("y") : null;
 
                     Point location = null;
                     if (lon != null && lat != null) {
+                        // JTS Coordinate: (x=경도, y=위도) 순서
                         location = geometryFactory.createPoint(new Coordinate(lon, lat));
                         location.setSRID(4326);
+
+                    }
+
+                    Integer distance = 0;
+                    if (p.has("distance")) {
+                        String distStr = p.optString("distance", "0");
+                        try {
+                            distance = Integer.parseInt(distStr);
+                        } catch (NumberFormatException ignored) {
+                            distance = 0;
+                        }
                     }
 
                     Place place = Place.builder()
                             .id(Long.parseLong(p.getString("id")))
-                            .school(school) // school 넣어야 함 (없으면 NPE)
+                            .school(school)
                             .placeName(p.optString("place_name", null))
                             .categoryGroupCode(p.optString("category_group_code", null))
                             .categoryGroupName(p.optString("category_group_name", null))
@@ -226,24 +240,23 @@ public class PlaceService {
                             .addressName(p.optString("address_name", null))
                             .roadAddressName(p.optString("road_address_name", null))
                             .location(location)
-                            .distance(p.has("distance")
-                                    ? Integer.parseInt(p.optString("distance", "0"))
-                                    : 0)
+                            .distance(distance)
                             .placeUrl(p.optString("place_url", null))
                             .build();
-
 
                     result.add(place);
                 }
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("places JSON 파싱 실패", e);
+            throw new RuntimeException("places JSON 파싱 실패: " + filePath, e);
         }
+
         return result;
     }
 
 
+    @Transactional
     public void importPlacesFromJson(String filePath, Long userId) {
         List<Place> places = parsePlacesFromJsonFile(filePath, userId);
         placeRepository.saveAll(places);

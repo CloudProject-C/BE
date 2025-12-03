@@ -1,5 +1,7 @@
 package com.cloudproject.TeamC.global.config;
 
+import com.cloudproject.TeamC.CampEat.domain.User;
+import com.cloudproject.TeamC.CampEat.infrastructure.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -11,12 +13,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
@@ -27,6 +32,7 @@ public class JwtTokenProvider {
     private long tokenValidTime = 30 * 60 * 1000L;
 
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     @PostConstruct
     protected void init() {
@@ -46,12 +52,23 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails =
-                userDetailsService.loadUserByUsername(getUserPk(token));
+//        UserDetails userDetails =
+//                userDetailsService.loadUserByUsername(getUserPk(token));
+//        return new UsernamePasswordAuthenticationToken(
+//                userDetails,
+//                "",
+//                userDetails.getAuthorities()
+//        );
+        String email = getUserPk(token);  // JWT subject = 이메일이라고 가정
+
+        // 여기서 UserRepository 필요
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
         return new UsernamePasswordAuthenticationToken(
-                userDetails,
-                "",
-                userDetails.getAuthorities()
+                user,        // principal에 엔티티 User
+                null,
+                List.of()   // 없으면 ROLE_USER 등 직접 구성
         );
     }
 
