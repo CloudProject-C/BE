@@ -1,7 +1,6 @@
 package com.cloudproject.TeamC.CampEat.application;
 
 
-import com.cloudproject.TeamC.CampEat.dto.response.QdrantGetResponse;
 import com.cloudproject.TeamC.CampEat.dto.response.QdrantScrollResponse;
 import com.cloudproject.TeamC.CampEat.dto.response.QdrantSearchHit;
 import com.cloudproject.TeamC.CampEat.dto.response.QdrantSearchResponse;
