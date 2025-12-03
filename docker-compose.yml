@@ -21,10 +21,9 @@ services:
     container_name: qdrant
     restart: unless-stopped
     ports:
-      - "6333:6333"   # HTTP / Web UI (http://localhost:6333/dashboard)
+      - "6333:6333"
     volumes:
       - qdrant-storage:/qdrant/storage
-
 
   cache-server:
     image: redis:7.4
@@ -35,9 +34,7 @@ services:
 
   app:
     container_name: my-spring-app
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKERHUB_USERNAME}/lifezip:latest
     depends_on:
       - mysql
       - cache-server
@@ -55,4 +52,3 @@ services:
 volumes:
   mysql-data:
   qdrant-storage:
-
