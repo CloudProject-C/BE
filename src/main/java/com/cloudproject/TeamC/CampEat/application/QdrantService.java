@@ -39,10 +39,7 @@ public class QdrantService {
                     .bodyToMono(String.class)
                     .block();
 
-            log.info("✅ Qdrant 컬렉션 '{}' 이미 존재", collectionName);
-
         } catch (Exception e) {
-            log.info("🔨 Qdrant 컬렉션 '{}' 생성 중...", collectionName);
 
             Map<String, Object> payload = Map.of(
                     "vectors", Map.of(
