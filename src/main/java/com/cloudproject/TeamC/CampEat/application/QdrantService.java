@@ -228,7 +228,6 @@ public class QdrantService {
 
 
 
-    // 2) restaurants 컬렉션에서 topN 검색
     public List<QdrantSearchHit> searchTopNInRestaurants(float[] embedding, int topN) {
         String url = qdrantBaseUrl + "/collections/restaurants/points/search";
 
