@@ -15,6 +15,13 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+      interval: 3s
 
   qdrant:
     image: qdrant/qdrant:v1.13.4
@@ -24,6 +31,8 @@ services:
       - "6333:6333"
     volumes:
       - qdrant-storage:/qdrant/storage
+    networks:
+      - app-network
 
   cache-server:
     image: redis:7.4
@@ -31,24 +40,41 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+      retries: 10
+      interval: 3s
 
   app:
     container_name: my-spring-app
     image: ${DOCKERHUB_USERNAME}/lifezip:latest
     depends_on:
-      - mysql
-      - cache-server
-      - qdrant
+      mysql:
+        condition: service_healthy
+      cache-server:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      SPRING_REDIS_HOST: cache-server
-      SPRING_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_HOST: cache-server
+      SPRING_DATA_REDIS_PORT: 6379
       QDRANT_URL: http://qdrant:6333
+    networks:
+      - app-network
+    restart: unless-stopped
 
 volumes:
   mysql-data:
   qdrant-storage:
+
+networks:
+  app-network:
+    driver: bridge
