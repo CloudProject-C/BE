@@ -55,7 +55,6 @@ public class GeminiApiService {
                     .onStatus(
                             status -> status.is4xxClientError() || status.is5xxServerError(),
                             clientResponse -> {
-                                log.error("❌ HTTP 에러 발생: {}", clientResponse.statusCode());
                                 return clientResponse.bodyToMono(String.class)
                                         .flatMap(errorBody -> {
                                             log.error("❌ 에러 응답 본문: {}", errorBody);
