@@ -19,9 +19,12 @@ import java.util.Map;
 public class QdrantService {
 
     private final WebClient webClient;
-    private final String qdrantRestaurantsUrl = "http://qdrant:6333/collections/restaurants/points";
-    private final String qdrantOnboardingUrl = "http://qdrant:6333/collections/onboarding/points";
-    private final String qdrantBaseUrl = "http://qdrant:6333";
+//    private final String qdrantRestaurantsUrl = "http://qdrant:6333/collections/restaurants/points";
+//    private final String qdrantOnboardingUrl = "http://qdrant:6333/collections/onboarding/points";
+//    private final String qdrantBaseUrl = "http://qdrant:6333";
+    private final String qdrantRestaurantsUrl = "http://localhost:6333/collections/restaurants/points";
+    private final String qdrantOnboardingUrl = "http://localhost:6333/collections/onboarding/points";
+    private final String qdrantBaseUrl = "http://localhost:6333";
 
     public QdrantService(WebClient.Builder builder) {
         this.webClient = builder.build();
@@ -253,6 +256,45 @@ public class QdrantService {
         }
         return hits;
     }
+
+    public Double searchSimilarityForRestaurant(float[] embedding, long restaurantId) {
+        String url = qdrantBaseUrl + "/collections/restaurants/points/search";
+
+        List<Float> vectorList = new ArrayList<>(embedding.length);
+        for (float v : embedding) vectorList.add(v);
+
+        // Qdrant filter.has_id 로 해당 id만 검색 대상으로 제한[web:1][web:14]
+        Map<String, Object> filter = Map.of(
+                "must", List.of(
+                        Map.of(
+                                "has_id", List.of(restaurantId)
+                        )
+                )
+        );
+
+        Map<String, Object> req = Map.of(
+                "vector", vectorList,
+                "top", 1,
+                "with_payload", false,
+                "filter", filter
+        );
+
+        QdrantSearchResponse resp = webClient.post()
+                .uri(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .retrieve()
+                .bodyToMono(QdrantSearchResponse.class)
+                .block();
+
+        if (resp == null || resp.getResult() == null || resp.getResult().isEmpty()) {
+            return null; // 해당 restaurantId가 컬렉션에 없을 때
+        }
+
+        // Qdrant가 계산해준 similarity(or distance 변환된 score)를 그대로 사용[web:2][web:10]
+        return resp.getResult().get(0).getScore();
+    }
+
 }
 
 

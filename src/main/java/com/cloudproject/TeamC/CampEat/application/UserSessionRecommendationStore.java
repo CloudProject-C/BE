@@ -9,8 +9,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserSessionRecommendationStore {
+    private final Map<Long, float[]> newEmbeddingStore = new ConcurrentHashMap<>();
 
     private final Map<Long, List<QdrantSearchHit>> store = new ConcurrentHashMap<>();
+    public void saveUserNewEmbedding(Long userId, float[] embedding) {
+        newEmbeddingStore.put(userId, embedding);
+    }
+
+    public float[] getUserNewEmbedding(Long userId) {
+        return newEmbeddingStore.get(userId);
+    }
 
     public void saveUserRecommendations(Long userId, List<QdrantSearchHit> hits) {
         store.put(userId, hits);

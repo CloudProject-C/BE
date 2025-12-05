@@ -43,8 +43,10 @@ public class PreferenceService {
 
         String newText = String.join(" ", newFeatures);
         float[] newEmbedding = geminiApiService.getEmbeddingFromGemini(newText);
+        recommendationStore.saveUserNewEmbedding(userId, newEmbedding);
 
         float[] oldEmbedding = qdrantService.getOnboardingEmbedding(userId);
+
 
         if (oldEmbedding == null) {
             qdrantService.saveOnboardingEmbedding(userId, newEmbedding, newFeatures);
@@ -61,6 +63,24 @@ public class PreferenceService {
         List<QdrantSearchHit> top = qdrantService.searchTopNInRestaurants(combined, 1000);
         recommendationStore.saveUserRecommendations(userId, top);
     }
+
+    public Double getSimilarityForUserAndRestaurant(Long userId, Long restaurantId) {
+        float[] newEmbedding = recommendationStore.getUserNewEmbedding(userId);
+        if (newEmbedding == null) return null;
+
+        float[] oldEmbedding = qdrantService.getOnboardingEmbedding(userId);
+        if (oldEmbedding == null) oldEmbedding = newEmbedding;
+
+        float[] combined = new float[newEmbedding.length];
+        float alpha = 0.7f;
+        float beta = 0.3f;
+        for (int i = 0; i < newEmbedding.length; i++) {
+            combined[i] = alpha * newEmbedding[i] + beta * oldEmbedding[i];
+        }
+
+        return qdrantService.searchSimilarityForRestaurant(combined, restaurantId);
+    }
+
 
 
     public List<QdrantSearchHit> getRecommendations(Long userId) {
