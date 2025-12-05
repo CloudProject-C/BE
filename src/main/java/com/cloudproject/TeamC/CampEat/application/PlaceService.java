@@ -263,7 +263,6 @@ public class PlaceService {
     }
 
 
-    @Transactional
     public void processPlace(Long id) {
         Place place = placeRepository.findByIdWithJpa(id);
 
@@ -280,7 +279,6 @@ public class PlaceService {
         qdrantService.saveEmbeddingToQdrant(place.getId(), embedding, keywords);
     }
 
-    @Transactional
     public void processAllPlacesInBatches(int batchSize, long delayMillis) {
         List<Place> places = placeRepository.findAll();
         int total = places.size();
