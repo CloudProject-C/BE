@@ -5,7 +5,6 @@ import com.cloudproject.TeamC.CampEat.dto.response.QdrantScrollResponse;
 import com.cloudproject.TeamC.CampEat.dto.response.QdrantSearchHit;
 import com.cloudproject.TeamC.CampEat.dto.response.QdrantSearchResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,12 +19,9 @@ import java.util.Map;
 public class QdrantService {
 
     private final WebClient webClient;
-    @Value("${QDRANT_URL}")
-    private String qdrantBaseUrl;
-    private String qdrantRestaurantsUrl = qdrantBaseUrl + "/collections/restaurants/points";
-
-    private String qdrantOnboardingUrl = qdrantBaseUrl + "/collections/onboarding/points";
-
+    private final String qdrantRestaurantsUrl = "http://qdrant:6333/collections/restaurants/points";
+    private final String qdrantOnboardingUrl = "http://qdrant:6333/collections/onboarding/points";
+    private final String qdrantBaseUrl = "http://qdrant:6333";
 
     public QdrantService(WebClient.Builder builder) {
         this.webClient = builder.build();
