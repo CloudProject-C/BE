@@ -62,7 +62,7 @@ public record PlaceDetailResponse(
                 .placeUrl(place.getPlaceUrl())
                 .averageRating(Math.round(rating * 10.0) / 10.0)
                 .reviewCount(reviewCount)
-                .preferencePercent(preferencePercent) // TODO: 추후 Qdrant 검색 결과와 연동하여 값 주입 필요
+                .preferencePercent(preferencePercent)
                 .placeLikeCount(placeLikeCount)
                 .isLiked(isLiked)
                 .build();
