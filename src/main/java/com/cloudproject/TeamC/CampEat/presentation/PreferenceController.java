@@ -9,7 +9,6 @@ import com.cloudproject.TeamC.CampEat.dto.response.QdrantSearchHit;
 import com.cloudproject.TeamC.CampEat.presentation.swagger.PreferenceSwagger;
 import com.cloudproject.TeamC.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 

@@ -28,7 +28,7 @@ public class AuthController implements AuthSwagger {
 
     @Override
     @PostMapping("/email/send-email")
-    public CommonResponse<String> sendEmail(@RequestParam String email) throws Exception {
+    public CommonResponse<String> sendEmail(@RequestParam String email) {
         return CommonResponse.success(SEND_EMAIL_SUCCESS, emailService.sendMessage(email));
     }
 
