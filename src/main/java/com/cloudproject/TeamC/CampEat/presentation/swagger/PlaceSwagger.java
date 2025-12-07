@@ -51,7 +51,7 @@ public interface PlaceSwagger {
             @Parameter(description = "반경 (미터 단위)", example = "150")
             @RequestParam(defaultValue = "150") Double radius,
 
-            @Parameter(description = "정렬 (DISTANCE: 거리순, LIKES: 평점순, REVIEW: 리뷰많은순)", example = "DISTANCE")
+            @Parameter(description = "정렬 (DISTANCE: 거리순, LIKES: 평점순, REVIEW: 리뷰많은순, RECOMMENDATION: 유사도 높은 순)", example = "DISTANCE")
             @RequestParam(defaultValue = "DISTANCE") String sort,
 
             @Parameter(description = "카테고리 필터 (KOREAN, WESTERN 등)")
