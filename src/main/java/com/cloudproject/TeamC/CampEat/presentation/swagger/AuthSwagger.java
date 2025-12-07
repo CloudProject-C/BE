@@ -16,7 +16,7 @@ public interface AuthSwagger {
     @Operation(summary = "이메일 인증 코드 전송", description = "회원가입을 위해 이메일로 인증 코드를 전송합니다.")
     CommonResponse<String> sendEmail(
             @Parameter(description = "인증할 이메일 주소", example = "test@khu.ac.kr")
-            @RequestParam String email) throws Exception;
+            @RequestParam String email);
 
     @Operation(summary = "이메일 인증 코드 확인", description = "전송된 인증 코드를 검증합니다.")
     CommonResponse<Void> verifyCode(@RequestBody EmailVerifyRequest requestDto);
