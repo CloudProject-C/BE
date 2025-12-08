@@ -38,7 +38,7 @@ public record PlaceDetailResponse(
         @Schema(description = "총 리뷰 수", example = "120")
         Long reviewCount,
 
-        @Schema(description = "선호도 퍼센트 (Qdrant 코사인 유사도)", example = "null")
+        @Schema(description = "선호도 퍼센트 (Qdrant 코사인 유사도)", example = "85")
         Integer preferencePercent,
 
         @Schema(description = "장소 좋아요(찜) 수", example = "5")
@@ -47,7 +47,7 @@ public record PlaceDetailResponse(
         @Schema(description = "내가 좋아요 한 여부", example = "true")
         boolean isLiked
 ) {
-    public static PlaceDetailResponse of(Place place, Double averageRating, Long reviewCount, Integer calculatedDistance, Long placeLikeCount, boolean isLiked) {
+    public static PlaceDetailResponse of(Place place, Double averageRating, Long reviewCount, Integer calculatedDistance, Long placeLikeCount, boolean isLiked, Integer preferencePercent) {
         // 평점이 없으면 0.0 처리
         double rating = (averageRating != null) ? averageRating : 0.0;
 
@@ -62,7 +62,7 @@ public record PlaceDetailResponse(
                 .placeUrl(place.getPlaceUrl())
                 .averageRating(Math.round(rating * 10.0) / 10.0)
                 .reviewCount(reviewCount)
-                .preferencePercent(null) // TODO: 추후 Qdrant 검색 결과와 연동하여 값 주입 필요
+                .preferencePercent(preferencePercent)
                 .placeLikeCount(placeLikeCount)
                 .isLiked(isLiked)
                 .build();

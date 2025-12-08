@@ -7,28 +7,32 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "회원가입 요청")
 public class UserJoinRequest {
+
+    @Schema(description = "학교 ID", example = "1")
     private Long schoolId;
 
-    // 이메일 (User.email)
+    @Schema(description = "이메일", example = "test@khu.ac.kr")
     private String email;
 
-    // 비밀번호 (User.password)
+    @Schema(description = "비밀번호", example = "password1234")
     private String password;
 
-    // 닉네임 (User.nickname)
+    @Schema(description = "닉네임", example = "쩝쩝박사")
     private String nickname;
 
-    // 프로필 이미지 URL (User.profileImage)
+    @Schema(description = "프로필 이미지 URL (선택)", example = "https://s3.../profile.jpg")
     private String profileImage;
 
-    // 성별 (User.gender)
+    @Schema(description = "성별 (MALE, FEMALE)", example = "MALE")
     private Gender gender;
 
     public User toEntity(School school, PasswordEncoder passwordEncoder) {

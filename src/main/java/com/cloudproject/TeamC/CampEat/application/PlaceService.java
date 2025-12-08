@@ -41,6 +41,7 @@ public class PlaceService {
     private final UserRepository userRepository;
     private final GeminiApiService geminiApiService;
     private final QdrantService qdrantService;
+    private final PreferenceService preferenceService;
 
     private static final int WGS84_SRID = 4326;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
@@ -73,8 +74,18 @@ public class PlaceService {
         }
         log.info("User: lat={}, lon={}", userLat, userLon);
         log.info("Place: lat(Y)={}, lon(X)={}", place.getLocation().getY(), place.getLocation().getX());
+
+        Integer preferencePercent = null;
+        if (userId != null) {
+            Double similarity = preferenceService.getSimilarityForUserAndRestaurant(userId, placeId);
+            if (similarity != null) {
+                // 0.0 ~ 1.0 -> 0 ~ 100
+                preferencePercent = (int) (similarity * 100);
+            }
+        }
+
         // 4. 반환
-        return PlaceDetailResponse.of(place, averageRating, reviewCount, calculatedDistance, likeCount, isLiked);
+        return PlaceDetailResponse.of(place, averageRating, reviewCount, calculatedDistance, likeCount, isLiked, preferencePercent);
     }
 
     public List<PlaceMapResponse> getPlacesNearby(Long userId, Double lat, Double lon, Double radius, String sort, FoodCategory category) {
@@ -127,8 +138,16 @@ public class PlaceService {
                     Long placeLikeCount = placeLikeCountMap.getOrDefault(place.getId(), 0L);
                     boolean isLiked = myLikedPlaceIds.contains(place.getId());
 
-                    return PlaceMapResponse.of(place, distanceM, imageUrl, reviewCount, rating, placeLikeCount, isLiked);
-                })
+                    // 유사도 계산
+                    Integer preferencePercent = null;
+                    if (userId != null) {
+                        Double similarity = preferenceService.getSimilarityForUserAndRestaurant(userId, place.getId());
+                        if (similarity != null) {
+                            preferencePercent = (int) (similarity * 100);
+                        }
+                    }
+
+                    return PlaceMapResponse.of(place, distanceM, imageUrl, reviewCount, rating, placeLikeCount, isLiked, preferencePercent);                })
                 .sorted(getComparator(sort)) // 정렬
                 .collect(Collectors.toList());
     }
@@ -161,6 +180,10 @@ public class PlaceService {
             // [리뷰순] 리뷰가 많은 순 -> 평점이 높은 순
             case "REVIEW" -> Comparator.comparing(PlaceMapResponse::reviewCount).reversed()
                     .thenComparing(Comparator.comparing(PlaceMapResponse::rating).reversed());
+
+            // [추천순] 유사도가 높은 순 (null은 마지막에)
+            case "RECOMMENDATION" -> Comparator.comparing(PlaceMapResponse::preferencePercent,
+                    Comparator.nullsLast(Comparator.naturalOrder())).reversed();
 
             // [기본] 거리 가까운 순 (DISTANCE, LATEST 등)
             default -> Comparator.comparing(PlaceMapResponse::distance);

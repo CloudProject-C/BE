@@ -35,13 +35,16 @@ public record PlaceMapResponse(
         @Schema(description = "평점(정렬용)", example = "4.5")
         Double rating,
 
+        @Schema(description = "선호도 퍼센트 (Qdrant 코사인 유사도)", example = "85")
+        Integer preferencePercent,
+
         @Schema(description = "장소 좋아요(찜) 수", example = "5")
         Long placeLikeCount,
 
         @Schema(description = "내가 좋아요 한 여부", example = "true")
         boolean isLiked
 ) {
-    public static PlaceMapResponse of(Place place, Integer distance, String imageUrl, Long reviewCount, Double rating, Long placeLikeCount, boolean isLiked) {
+    public static PlaceMapResponse of(Place place, Integer distance, String imageUrl, Long reviewCount, Double rating, Long placeLikeCount, boolean isLiked, Integer preferencePercent) {
         return PlaceMapResponse.builder()
                 .placeId(place.getId())
                 .placeName(place.getPlaceName())
@@ -52,6 +55,7 @@ public record PlaceMapResponse(
                 .imageUrl(imageUrl)
                 .reviewCount(reviewCount)
                 .rating(rating)
+                .preferencePercent(preferencePercent)
                 .placeLikeCount(placeLikeCount)
                 .isLiked(isLiked)
                 .build();
