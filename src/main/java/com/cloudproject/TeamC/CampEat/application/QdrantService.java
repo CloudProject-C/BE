@@ -19,12 +19,12 @@ import java.util.Map;
 public class QdrantService {
 
     private final WebClient webClient;
-//    private final String qdrantRestaurantsUrl = "http://qdrant:6333/collections/restaurants/points";
-//    private final String qdrantOnboardingUrl = "http://qdrant:6333/collections/onboarding/points";
-//    private final String qdrantBaseUrl = "http://qdrant:6333";
-    private final String qdrantRestaurantsUrl = "http://localhost:6333/collections/restaurants/points";
-    private final String qdrantOnboardingUrl = "http://localhost:6333/collections/onboarding/points";
-    private final String qdrantBaseUrl = "http://localhost:6333";
+    private final String qdrantRestaurantsUrl = "http://qdrant:6333/collections/restaurants/points";
+    private final String qdrantOnboardingUrl = "http://qdrant:6333/collections/onboarding/points";
+    private final String qdrantBaseUrl = "http://qdrant:6333";
+//    private final String qdrantRestaurantsUrl = "http://localhost:6333/collections/restaurants/points";
+//    private final String qdrantOnboardingUrl = "http://localhost:6333/collections/onboarding/points";
+//    private final String qdrantBaseUrl = "http://localhost:6333";
 
     public QdrantService(WebClient.Builder builder) {
         this.webClient = builder.build();
