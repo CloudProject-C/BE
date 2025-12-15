@@ -48,8 +48,8 @@ public class EmailService {
     private MimeMessage createMessage(String to, String code)
             throws MessagingException, UnsupportedEncodingException {
 
-        log.info("보내는 대상: {}", to);
-        log.info("인증 번호: {}", code);
+        log.info("[AUTH] 보내는 대상: {}", to);
+        log.info("[AUTH] 인증 번호: {}", code);
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -81,6 +81,7 @@ public class EmailService {
         try {
             MimeMessage message = createMessage(to, code);
             javaMailSender.send(message);
+            log.info("[AUTH] 메일 발송 성공");
         } catch (MessagingException | UnsupportedEncodingException | MailException e) {
             log.error("메일 발송 중 오류", e);
             throw new BusinessException(ErrorCode.UNABLE_TO_SEND_EMAIL);
@@ -101,6 +102,7 @@ public class EmailService {
 
         String storedCode = redisUtil.get(key);
         if (storedCode != null && storedCode.equals(requestDto.code())) {
+            log.info("[AUTH] 코드 인증 성공");
             return true;
         }
 
