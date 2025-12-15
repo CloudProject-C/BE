@@ -10,9 +10,11 @@ import com.cloudproject.TeamC.CampEat.infrastructure.repository.SchoolRepository
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.UserRepository;
 import com.cloudproject.TeamC.global.config.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -33,6 +35,7 @@ public class AuthService {
 
         User user = userJoinRequestDto.toEntity(school, passwordEncoder);
         userRepository.save(user);
+        log.info("[AUTH] 사용자 저장", user.getId());
     }
 
     public String login(String email, String userPassword) {
@@ -43,6 +46,7 @@ public class AuthService {
             throw new CampEatException(CampEatErrorCode.INVALID_PASSWORD);
         }
 
+        log.info("[AUTH] 해당 유저 찾기 성공", user.getId());
         return jwtTokenProvider.createToken(email);
     }
 }
