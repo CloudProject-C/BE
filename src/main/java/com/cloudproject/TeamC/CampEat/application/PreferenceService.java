@@ -3,6 +3,7 @@ package com.cloudproject.TeamC.CampEat.application;
 import com.cloudproject.TeamC.CampEat.dto.request.PreferenceRequest;
 import com.cloudproject.TeamC.CampEat.dto.request.RecommendRequest;
 import com.cloudproject.TeamC.CampEat.dto.response.QdrantSearchHit;
+import com.cloudproject.TeamC.CampEat.dto.response.RecommendationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -60,9 +61,11 @@ public class PreferenceService {
             combined[i] = alpha * newEmbedding[i] + beta * oldEmbedding[i];
         }
 
-        List<QdrantSearchHit> top = qdrantService.searchTopNInRestaurants(combined, 1000);
+        List<QdrantSearchHit> top = qdrantService.searchTopNInRestaurants(combined, 3);
         recommendationStore.saveUserRecommendations(userId, top);
     }
+
+
 
     public Double getSimilarityForUserAndRestaurant(Long userId, Long restaurantId) {
         float[] newEmbedding = recommendationStore.getUserNewEmbedding(userId);
@@ -85,5 +88,15 @@ public class PreferenceService {
 
     public List<QdrantSearchHit> getRecommendations(Long userId) {
         return recommendationStore.getUserRecommendations(userId);
+    }
+
+    public List<RecommendationResponse> getRecommendationTop3(Long userId) {
+        return recommendationStore.getUserRecommendations(userId)
+                .stream()
+                .map(hit -> new RecommendationResponse(
+                        hit.getId(),
+                        hit.getScore()
+                ))
+                .toList();
     }
 }
