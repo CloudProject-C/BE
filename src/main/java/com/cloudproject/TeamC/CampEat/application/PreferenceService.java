@@ -33,6 +33,7 @@ public class PreferenceService {
 
             qdrantService.createCollectionIfNotExists("onboarding",3072);
             qdrantService.saveOnboardingEmbedding(userId, embedding, features);
+            log.info("[PREFERENCE] 온보딩 임베딩 저장 완료", userId);
 
         } catch (Exception e) {
             log.error("💥 온보딩 처리 중 에러 userId={}", userId, e);
@@ -61,8 +62,11 @@ public class PreferenceService {
             combined[i] = alpha * newEmbedding[i] + beta * oldEmbedding[i];
         }
 
+        log.info("[PREFERENCE] 선호도 가중치 계산 완료", userId);
+
         List<QdrantSearchHit> top = qdrantService.searchTopNInRestaurants(combined, 3);
         recommendationStore.saveUserRecommendations(userId, top);
+        log.info("[PREFERENCE] 추천 맛집 저장", userId);
     }
 
 
@@ -80,6 +84,8 @@ public class PreferenceService {
         for (int i = 0; i < newEmbedding.length; i++) {
             combined[i] = alpha * newEmbedding[i] + beta * oldEmbedding[i];
         }
+
+        log.info("[PREFERENCE] 선호도 가중치 계산 완료", userId);
 
         return qdrantService.searchSimilarityForRestaurant(combined, restaurantId);
     }
