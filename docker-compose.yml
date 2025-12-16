@@ -67,10 +67,17 @@ services:
       SPRING_DATA_REDIS_HOST: cache-server
       SPRING_DATA_REDIS_PORT: 6379
       QDRANT_URL: http://qdrant:6333
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
-      AWS_REGION: us-east-1
+#      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+#      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+#      AWS_REGION: us-east-1
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: /myapp/spring
+        awslogs-stream: app
+        awslogs-create-group: "false"
     networks:
       - app-network
     restart: unless-stopped
