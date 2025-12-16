@@ -3,6 +3,7 @@ services:
     image: mysql:8.3
     container_name: my-spring-mysql
     environment:
+      SPRING_CLOUD_AWS_S3_BUCKET: campeat2
       MYSQL_ROOT_HOST: "%"
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
