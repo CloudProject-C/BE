@@ -28,6 +28,7 @@ public class S3Service {
         if (file.isEmpty() || file.getOriginalFilename() == null) {
             throw new BusinessException(ErrorCode.BAD_REQUEST);
         }
+        log.info("S3 Service Loaded Bucket Name: {}", this.bucket);
 
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
