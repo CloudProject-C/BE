@@ -52,11 +52,7 @@ public class PlaceService {
         log.info("[PLACE] 장소 상세 조회 - placeId: {}, userId: {}", placeId, userId);
 
         if (recommendationStore.isRecommendedPlace(userId, placeId)) {
-            log.info(
-                    "{{\"event\":\"RECOMMENDATION_HIT\",\"userId\":{},\"placeId\":{}}}",
-                    userId,
-                    placeId
-            );
+            log.info("[CLICK] 추천 장소 선택 - placeId: {}, userId: {}", placeId, userId);
         }
 
 
