@@ -1,6 +1,6 @@
-# BE
+# CampEat
+## BE
 
----
 
 ## Git 규칙 (Issue · Branch · Commit)
 
