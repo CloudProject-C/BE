@@ -47,6 +47,8 @@ public class PlaceService {
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
 
     public PlaceDetailResponse getPlaceDetail(Long placeId, Double userLat, Double userLon, Long userId) {
+        log.info("[PLACE] 장소 상세 조회 - placeId: {}, userId: {}", placeId, userId);
+
         // 1. 장소 조회
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new CampEatException(CampEatErrorCode.PLACE_NOT_FOUND));
@@ -89,6 +91,9 @@ public class PlaceService {
     }
 
     public List<PlaceMapResponse> getPlacesNearby(Long userId, Double lat, Double lon, Double radius, String sort, FoodCategory category) {
+        log.info("[PLACE] 주변 장소 검색 - userId: {}, lat: {}, lon: {}, radius: {}, sort: {}, category: {}",
+                userId, lat, lon, radius, sort, category);
+
         // 1. 사용자 위치 Point 생성
         Point userPoint = geometryFactory.createPoint(new Coordinate(lon, lat));
 
@@ -154,6 +159,8 @@ public class PlaceService {
 
     @Transactional
     public void togglePlaceLike(Long placeId, Long userId) {
+        log.info("[PLACE] 장소 찜 토글 - placeId: {}, userId: {}", placeId, userId);
+
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new CampEatException(CampEatErrorCode.PLACE_NOT_FOUND));
 

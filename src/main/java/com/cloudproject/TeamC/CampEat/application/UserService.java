@@ -12,6 +12,7 @@ import com.cloudproject.TeamC.CampEat.exception.code.CampEatErrorCode;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.*;
 import com.cloudproject.TeamC.global.util.DtoUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,6 +37,8 @@ public class UserService {
 
     // 1. 마이 페이지 조회
     public MyPageResponse getMyPageInfo(Long userId) {
+        log.info("[USER] 마이 페이지 조회 요청 - userId: {}", userId);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CampEatException(CampEatErrorCode.USER_NOT_FOUND));
 
@@ -50,6 +54,8 @@ public class UserService {
 
     // 2. 내가 작성한 리뷰 목록 조회
     public Page<MyReviewResponse> getMyReviews(Long userId, String sortType, int page, int size) {
+        log.info("[USER] 내 리뷰 목록 조회 - userId: {}, page: {}", userId, page);
+
         Page<Object[]> reviewPage;
 
         if ("LIKES".equalsIgnoreCase(sortType)) {
@@ -68,6 +74,8 @@ public class UserService {
 
     // 3. 내가 좋아요 누른 음식점 목록 조회
     public Page<MyLikedPlaceResponse> getMyLikedPlaces(Long userId, Pageable pageable) {
+        log.info("[USER] 찜한 음식점 목록 조회 - userId: {}, page: {}", userId, pageable.getPageNumber());
+
         // 1. 좋아요한 장소 목록 페이징 조회
         Page<PlaceLike> placeLikes = placeLikeRepository.findByUserId(userId, pageable);
 

@@ -8,6 +8,7 @@ import com.cloudproject.TeamC.CampEat.infrastructure.repository.*;
 import com.cloudproject.TeamC.CampEat.exception.CampEatException;
 import com.cloudproject.TeamC.global.util.LocationUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,6 +38,7 @@ public class ReviewService {
 
     @Transactional
     public List<String> createReview(Long userId, ReviewCreateRequest request, List<MultipartFile> images) {
+        log.info("[REVIEW] 리뷰 작성 요청 - userId: {}, placeId: {}, rating: {}", userId, request.placeId(), request.rating());
         // 1. 사용자 및 음식점 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CampEatException(CampEatErrorCode.USER_NOT_FOUND));
@@ -63,6 +66,7 @@ public class ReviewService {
 
         // 5. 이미지 업로드 및 Review에 추가 (Cascade 활용)
         if (images != null && !images.isEmpty()) {
+            log.info("[REVIEW] 이미지 업로드 진행 - 개수: {}", images.size());
             for (MultipartFile file : images) {
                 String imageUrl = s3Service.upload(file);
                 // String imageUrl = "https://dummy-s3-url.com/image.jpg";
@@ -85,6 +89,7 @@ public class ReviewService {
     }
 
     public Page<ReviewResponse> getReviews(Long placeId, String sortType, int page, int size, Long currentUserId) {
+        log.info("[REVIEW] 리뷰 목록 조회 - placeId: {}, sort: {}, page: {}, userId: {}", placeId, sortType, page, currentUserId);
         Pageable pageable = createPageable(sortType, page, size);
 
         Page<Object[]> reviewPage;
@@ -116,6 +121,7 @@ public class ReviewService {
 
     @Transactional
     public void toggleReviewLike(Long reviewId, Long userId) {
+        log.info("[REVIEW] 리뷰 좋아요 토글 - reviewId: {}, userId: {}", reviewId, userId);
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CampEatException(CampEatErrorCode.REVIEW_NOT_FOUND));
 
