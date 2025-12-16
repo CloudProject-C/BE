@@ -70,6 +70,8 @@ dependencies {
 	//redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+	//cloudwatch
+	implementation 'org.springframework.boot:spring-boot-starter-logging'
 
 }
 

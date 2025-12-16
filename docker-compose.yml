@@ -71,6 +71,13 @@ services:
       - app-network
     restart: unless-stopped
 
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: campeat-logs
+        awslogs-stream-prefix: app
+
 volumes:
   mysql-data:
   qdrant-storage:
