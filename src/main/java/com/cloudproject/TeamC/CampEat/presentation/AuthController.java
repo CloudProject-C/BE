@@ -7,6 +7,7 @@ import com.cloudproject.TeamC.CampEat.dto.request.EmailVerifyRequest;
 import com.cloudproject.TeamC.CampEat.dto.request.UserJoinRequest;
 import com.cloudproject.TeamC.CampEat.dto.request.UserLoginRequest;
 import com.cloudproject.TeamC.CampEat.presentation.swagger.AuthSwagger;
+import com.cloudproject.TeamC.global.cloudwatch.LogCapture;
 import com.cloudproject.TeamC.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class AuthController implements AuthSwagger {
 
     private final AuthService authService;
     private final EmailService emailService;
+    private final LogCapture logCapture;
 
     @Override
     @PostMapping("/email/send-email")
@@ -55,6 +57,8 @@ public class AuthController implements AuthSwagger {
     @PostMapping("/login")
     public CommonResponse<String> login(@RequestBody UserLoginRequest userLoginDto) {
         String token = authService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
+        log.info("로그인 요청");
+        logCapture.capture("로그인 요청 logCapture");
         return CommonResponse.success(USER_LOGIN_SUCCESS, token);
     }
 
