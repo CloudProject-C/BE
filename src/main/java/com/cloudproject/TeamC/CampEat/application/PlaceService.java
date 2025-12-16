@@ -53,6 +53,8 @@ public class PlaceService {
 
         if (recommendationStore.isRecommendedPlace(userId, placeId)) {
             log.info("[CLICK] 추천 장소 선택 - placeId: {}, userId: {}", placeId, userId);
+        }else{
+            log.info("[CLICK] 다른 장소 선택 - placeId: {}, userId: {}", placeId, userId);
         }
 
 

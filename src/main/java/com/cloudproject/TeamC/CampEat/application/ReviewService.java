@@ -33,6 +33,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final PlaceRepository placeRepository;
     private final S3Service s3Service;
+    private final UserSessionRecommendationStore recommendationStore;
 
     private static final double ALLOWED_DISTANCE_KM = 0.5;
 
@@ -45,6 +46,10 @@ public class ReviewService {
 
         Place place = placeRepository.findById(request.placeId())
                 .orElseThrow(() -> new CampEatException(CampEatErrorCode.PLACE_NOT_FOUND));
+
+        if (recommendationStore.isRecommendedPlace(userId, request.placeId())) {
+            log.info("[SUCCESS] 추천 장소 리뷰 전환 - placeId: {}, userId: {}", request.placeId(), userId);
+        }
 
         // 2. [검증] 이미지 개수 제한 (0~5장)
         if (images != null && images.size() > 5) {
