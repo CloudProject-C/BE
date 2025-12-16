@@ -7,7 +7,6 @@ import com.cloudproject.TeamC.CampEat.dto.request.EmailVerifyRequest;
 import com.cloudproject.TeamC.CampEat.dto.request.UserJoinRequest;
 import com.cloudproject.TeamC.CampEat.dto.request.UserLoginRequest;
 import com.cloudproject.TeamC.CampEat.presentation.swagger.AuthSwagger;
-import com.cloudproject.TeamC.global.cloudwatch.LogCapture;
 import com.cloudproject.TeamC.global.common.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
