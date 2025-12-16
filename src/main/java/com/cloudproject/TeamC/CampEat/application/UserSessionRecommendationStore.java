@@ -31,4 +31,14 @@ public class UserSessionRecommendationStore {
     public void clearUserRecommendations(Long userId) {
         store.remove(userId);
     }
+
+    public boolean isRecommendedPlace(Long userId, Long placeId) {
+        List<QdrantSearchHit> hits = store.get(userId);
+        if (hits == null) {
+            return false;
+        }
+
+        return hits.stream()
+                .anyMatch(hit -> placeId.equals(hit.getId()));
+    }
 }

@@ -2,6 +2,7 @@ package com.cloudproject.TeamC.CampEat.application;
 
 
 import com.cloudproject.TeamC.CampEat.domain.*;
+import com.cloudproject.TeamC.CampEat.dto.response.QdrantSearchHit;
 import com.cloudproject.TeamC.CampEat.infrastructure.repository.PlaceRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -46,8 +47,18 @@ public class PlaceService {
     private static final int WGS84_SRID = 4326;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), WGS84_SRID);
 
+    private final UserSessionRecommendationStore recommendationStore;
     public PlaceDetailResponse getPlaceDetail(Long placeId, Double userLat, Double userLon, Long userId) {
         log.info("[PLACE] 장소 상세 조회 - placeId: {}, userId: {}", placeId, userId);
+
+        if (recommendationStore.isRecommendedPlace(userId, placeId)) {
+            log.info(
+                    "{{\"event\":\"RECOMMENDATION_HIT\",\"userId\":{},\"placeId\":{}}}",
+                    userId,
+                    placeId
+            );
+        }
+
 
         // 1. 장소 조회
         Place place = placeRepository.findById(placeId)
