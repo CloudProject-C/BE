@@ -76,7 +76,7 @@ services:
       options:
         awslogs-region: us-east-1
         awslogs-group: campeat-logs
-        awslogs-stream-prefix: app
+        awslogs-stream: campeat-app
 
 volumes:
   mysql-data:
