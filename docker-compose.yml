@@ -72,13 +72,13 @@ services:
 #      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 #      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
 #      AWS_REGION: us-east-1
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /myapp/spring
-        awslogs-stream: app
-        awslogs-create-group: "false"
+    # logging:
+    #   driver: awslogs
+    #   options:
+    #     awslogs-region: us-east-1
+    #     awslogs-group: /myapp/spring
+    #     awslogs-stream: app
+    #     awslogs-create-group: "false"
     networks:
       - app-network
     restart: unless-stopped
