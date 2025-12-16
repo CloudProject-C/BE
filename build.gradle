@@ -20,6 +20,12 @@ configurations {
 	}
 }
 
+dependencyManagement {
+	imports {
+		mavenBom "software.amazon.awssdk:bom:2.25.10"
+	}
+}
+
 repositories {
 	mavenCentral()
 }
@@ -72,7 +78,8 @@ dependencies {
 
 	//cloudwatch
 	implementation 'org.springframework.boot:spring-boot-starter-logging'
-
+	implementation "software.amazon.awssdk:cloudwatchlogs"
+	implementation "software.amazon.awssdk:auth"
 }
 
 tasks.named('test') {
