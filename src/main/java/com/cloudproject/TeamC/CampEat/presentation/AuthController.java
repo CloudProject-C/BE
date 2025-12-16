@@ -26,7 +26,6 @@ public class AuthController implements AuthSwagger {
 
     private final AuthService authService;
     private final EmailService emailService;
-    private final LogCapture logCapture;
 
     @Override
     @PostMapping("/email/send-email")
@@ -58,7 +57,7 @@ public class AuthController implements AuthSwagger {
     public CommonResponse<String> login(@RequestBody UserLoginRequest userLoginDto) {
         String token = authService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
         log.info("로그인 요청");
-        logCapture.capture("로그인 요청 logCapture");
+//        logCapture.capture("로그인 요청 logCapture");
         return CommonResponse.success(USER_LOGIN_SUCCESS, token);
     }
 
